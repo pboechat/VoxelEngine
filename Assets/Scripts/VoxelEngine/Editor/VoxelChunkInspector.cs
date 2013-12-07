@@ -72,7 +72,6 @@ public class VoxelChunkInspector : Editor
 				_target.width = EditorGUILayout.IntField ("Width", _target.width);
 				_target.height = EditorGUILayout.IntField ("Height", _target.height);
 				_target.depth = EditorGUILayout.IntField ("Depth", _target.depth);
-				_target.material = (Material)EditorGUILayout.ObjectField ("Material", _target.material, typeof(Material), true);
 				
 				newDataString = EditorGUILayout.TextArea (newDataString);
 				

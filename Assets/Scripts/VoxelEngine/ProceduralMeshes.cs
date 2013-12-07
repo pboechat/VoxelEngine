@@ -5,12 +5,12 @@ using System.Linq;
 public class ProceduralMeshes
 {
 		private static readonly Rect[] DEFAULT_CUBIC_UVS = new Rect[] {
-				new Rect (0.0f, 0.0f, 1.0f, 1.0f),
-				new Rect (0.0f, 0.0f, 1.0f, 1.0f),
-				new Rect (0.0f, 0.0f, 1.0f, 1.0f),
-				new Rect (0.0f, 0.0f, 1.0f, 1.0f),
-				new Rect (0.0f, 0.0f, 1.0f, 1.0f),
-				new Rect (0.0f, 0.0f, 1.0f, 1.0f)
+		new Rect (0.3751f, 0.500f, 0.249f, 0.249f), // front
+		new Rect (0.3751f, 0.249f, 0.249f, 0.249f), // top
+		new Rect (0.6251f, 0.249f, 0.249f, 0.249f), // right
+		new Rect (0.3751f, 0.749f, 0.249f, 0.249f), // back
+		new Rect (0.3751f, 0.500f, 0.249f, 0.249f), // bottom
+		new Rect (0.1251f, 0.249f, 0.249f, 0.249f)  // left
 		};
 
 		public static void CreateCube (ProceduralMesh mesh, float width, float height, float depth, int excludeFaces = 0)
@@ -104,35 +104,41 @@ public class ProceduralMeshes
 				mesh.AddNormal (new Vector3 (-1.0f, 0.0f, 0.0f));
 				mesh.AddNormal (new Vector3 (-1.0f, 0.0f, 0.0f));
 
-				mesh.AddUv (new Vector2 (uvRect [0].xMin, uvRect [0].yMin));
-				mesh.AddUv (new Vector2 (uvRect [0].xMax, uvRect [0].yMin));
-				mesh.AddUv (new Vector2 (uvRect [0].xMax, uvRect [0].yMax));
+				// back
 				mesh.AddUv (new Vector2 (uvRect [0].xMin, uvRect [0].yMax));
-				
-				mesh.AddUv (new Vector2 (uvRect [1].xMin, uvRect [1].yMin));
-				mesh.AddUv (new Vector2 (uvRect [1].xMax, uvRect [1].yMin));
-				mesh.AddUv (new Vector2 (uvRect [1].xMax, uvRect [1].yMax));
+				mesh.AddUv (new Vector2 (uvRect [0].xMax, uvRect [0].yMax));
+				mesh.AddUv (new Vector2 (uvRect [0].xMax, uvRect [0].yMin));
+				mesh.AddUv (new Vector2 (uvRect [0].xMin, uvRect [0].yMin));
+			
+				// top	
 				mesh.AddUv (new Vector2 (uvRect [1].xMin, uvRect [1].yMax));
+				mesh.AddUv (new Vector2 (uvRect [1].xMax, uvRect [1].yMax));
+				mesh.AddUv (new Vector2 (uvRect [1].xMax, uvRect [1].yMin));
+				mesh.AddUv (new Vector2 (uvRect [1].xMin, uvRect [1].yMin));
 				
-				mesh.AddUv (new Vector2 (uvRect [2].xMin, uvRect [2].yMin));
-				mesh.AddUv (new Vector2 (uvRect [2].xMax, uvRect [2].yMin));
-				mesh.AddUv (new Vector2 (uvRect [2].xMax, uvRect [2].yMax)); 
+				// right
 				mesh.AddUv (new Vector2 (uvRect [2].xMin, uvRect [2].yMax));
+				mesh.AddUv (new Vector2 (uvRect [2].xMax, uvRect [2].yMax));
+				mesh.AddUv (new Vector2 (uvRect [2].xMax, uvRect [2].yMin)); 
+				mesh.AddUv (new Vector2 (uvRect [2].xMin, uvRect [2].yMin));
 				
-				mesh.AddUv (new Vector2 (uvRect [3].xMin, uvRect [3].yMin));
-				mesh.AddUv (new Vector2 (uvRect [3].xMax, uvRect [3].yMin));
-				mesh.AddUv (new Vector2 (uvRect [3].xMax, uvRect [3].yMax));
+				// front
 				mesh.AddUv (new Vector2 (uvRect [3].xMin, uvRect [3].yMax));
+				mesh.AddUv (new Vector2 (uvRect [3].xMax, uvRect [3].yMax));
+				mesh.AddUv (new Vector2 (uvRect [3].xMax, uvRect [3].yMin));
+				mesh.AddUv (new Vector2 (uvRect [3].xMin, uvRect [3].yMin));
 				
+				// bottom
 				mesh.AddUv (new Vector2 (uvRect [4].xMin, uvRect [4].yMin));
 				mesh.AddUv (new Vector2 (uvRect [4].xMax, uvRect [4].yMin));
 				mesh.AddUv (new Vector2 (uvRect [4].xMax, uvRect [4].yMax));
 				mesh.AddUv (new Vector2 (uvRect [4].xMin, uvRect [4].yMax));
 				
-				mesh.AddUv (new Vector2 (uvRect [5].xMin, uvRect [5].yMin));
-				mesh.AddUv (new Vector2 (uvRect [5].xMax, uvRect [5].yMin));
-				mesh.AddUv (new Vector2 (uvRect [5].xMax, uvRect [5].yMax)); 
+				// left
 				mesh.AddUv (new Vector2 (uvRect [5].xMin, uvRect [5].yMax));
+				mesh.AddUv (new Vector2 (uvRect [5].xMax, uvRect [5].yMax));
+				mesh.AddUv (new Vector2 (uvRect [5].xMax, uvRect [5].yMin)); 
+				mesh.AddUv (new Vector2 (uvRect [5].xMin, uvRect [5].yMin));
 				
 				if (hasFrontFace) {
 						mesh.AddIndex (i + 12);
@@ -141,6 +147,13 @@ public class ProceduralMeshes
 						mesh.AddIndex (i + 12);
 						mesh.AddIndex (i + 14);
 						mesh.AddIndex (i + 15);
+				} else {
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
 				}
 		
 				if (hasTopFace) {
@@ -150,6 +163,13 @@ public class ProceduralMeshes
 						mesh.AddIndex (i + 4);
 						mesh.AddIndex (i + 6);
 						mesh.AddIndex (i + 7);
+				} else {
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
 				}
 		
 				if (hasRightFace) {
@@ -159,6 +179,13 @@ public class ProceduralMeshes
 						mesh.AddIndex (i + 8);
 						mesh.AddIndex (i + 10);
 						mesh.AddIndex (i + 11);
+				} else {
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
 				}
 		
 				if (hasBackFace) {
@@ -168,6 +195,13 @@ public class ProceduralMeshes
 						mesh.AddIndex (i);
 						mesh.AddIndex (i + 2);
 						mesh.AddIndex (i + 3);
+				} else {
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
 				}
 		
 				if (hasBottomFace) {
@@ -177,6 +211,13 @@ public class ProceduralMeshes
 						mesh.AddIndex (i + 16); 
 						mesh.AddIndex (i + 19); 
 						mesh.AddIndex (i + 18);
+				} else {
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
 				}
 		
 				if (hasLeftFace) {
@@ -186,6 +227,13 @@ public class ProceduralMeshes
 						mesh.AddIndex (i + 20); 
 						mesh.AddIndex (i + 23); 
 						mesh.AddIndex (i + 22);
+				} else {
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
+						mesh.AddIndex (0);
 				}
 		}
 	

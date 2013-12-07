@@ -1,17 +1,61 @@
 using UnityEngine;
+using System;
 
 public class VoxelEngine : Singleton<VoxelEngine>
 {
 		[SerializeField]
+		public Material
+				atlas;
+		[SerializeField]
+		public int
+				pickingButton;
+		[SerializeField]
+		public float
+				pickingDistance;
+		[SerializeField]
+		new public Camera
+				camera;
+		[SerializeField]
+		private int
+				_tileSize;
+		[SerializeField]
 		private float
 				_voxelSize;
-		private float _halfVoxelSize;
-		private Vector3 _up;
-		private Vector3 _down;
-		private Vector3 _left;
-		private Vector3 _right;
-		private Vector3 _back;
-		private Vector3 _forward;
+		[SerializeField]
+		private float
+				_halfVoxelSize;
+		[SerializeField]
+		private Vector3
+				_up;
+		[SerializeField]
+		private Vector3
+				_down;
+		[SerializeField]
+		private Vector3
+				_left;
+		[SerializeField]
+		private Vector3
+				_right;
+		[SerializeField]
+		private Vector3
+				_back;
+		[SerializeField]
+		private Vector3
+				_forward;
+		[SerializeField]
+		private Rect[]
+				_tileUvs;
+				
+		public Rect GetTileUv (byte tile)
+		{
+				return _tileUvs [tile - 1];
+		}
+		
+		public int tileSize {
+				get {
+						return _tileSize;
+				}
+		}
 		
 		public Vector3 up {
 				get {
@@ -57,7 +101,7 @@ public class VoxelEngine : Singleton<VoxelEngine>
 				get { return _halfVoxelSize; }
 		}
 		
-		public void _SetVoxelSize (float voxelSize)
+		public void SetVoxelSize (float voxelSize)
 		{
 				_voxelSize = voxelSize;
 				_halfVoxelSize = _voxelSize * 0.5f;
@@ -67,5 +111,56 @@ public class VoxelEngine : Singleton<VoxelEngine>
 				_left = Vector3.left * _voxelSize;
 				_back = Vector3.back * _voxelSize;
 				_forward = Vector3.forward * _voxelSize;
+		}
+		
+		public void SetTileSize (int tileSize)
+		{
+				_tileSize = tileSize;
+				
+				Texture2D atlasTexture = (Texture2D)atlas.mainTexture;
+				
+				if (atlasTexture.width % tileSize != 0 || atlasTexture.height % tileSize != 0) {
+						Debug.LogError ("atlas dimensions must be multiple of tile size");
+						enabled = false;
+						return;
+				}
+				
+				int width = atlasTexture.width / tileSize;
+				int height = atlasTexture.height / tileSize;
+				
+				Vector2 xOffset = Vector3.right * (1.0f / width);
+				Vector2 yOffset = Vector3.up * (1.0f / height);
+				Vector2 hPos = Vector2.zero;
+				Vector2 vPos = (height - 1) * yOffset;
+				_tileUvs = new Rect[width * height];
+				int i = 0;
+				for (int y = height - 1; y > 0; y--) {
+						for (int x = 0; x < width; x++) {
+								Vector2 uv = hPos + vPos;
+								_tileUvs [i++] = new Rect (uv.x, uv.y, xOffset.x, yOffset.y);
+								hPos += xOffset;	
+						}
+						vPos -= yOffset;
+				}
+		}
+		
+		void Update ()
+		{
+				if (camera == null) {
+						return;
+				}
+		
+				if (Input.GetMouseButtonDown (pickingButton)) {
+						Ray pickingRay = camera.ScreenPointToRay (Input.mousePosition);
+						RaycastHit hitInfo;
+						if (Physics.Raycast (pickingRay, out hitInfo, pickingDistance)) {
+								VoxelChunk chunk = hitInfo.collider.GetComponent<VoxelChunk> ();
+								if (chunk == null) {
+										return;
+								}
+								// TODO: implement different actions
+								chunk.AddVoxelAt (hitInfo.point, 1);
+						}
+				}
 		}
 }
