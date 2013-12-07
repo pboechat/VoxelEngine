@@ -9,7 +9,7 @@ public class VoxelChunk : MonoBehaviour
 		public int depth;
 		public byte[] data;
 		public Material material;
-
+	
 		bool HasTop (int x, int y, int z1)
 		{
 				if (y == height - 1) {
@@ -18,7 +18,7 @@ public class VoxelChunk : MonoBehaviour
 		
 				return data [(y + 1) * (depth * width) + z1 + x] > 0;
 		}
-		
+	
 		bool HasBottom (int x, int y, int z1)
 		{
 				if (y == 0) {
@@ -63,7 +63,7 @@ public class VoxelChunk : MonoBehaviour
 		
 				return data [y1 + (z + 1) * width + x] > 0;
 		}
-
+	
 		public void Build ()
 		{
 				if (width < 1 || height < 1 || depth < 1) {
@@ -71,14 +71,15 @@ public class VoxelChunk : MonoBehaviour
 						enabled = false;
 						return;
 				}
-
+		
 				MeshRenderer meshRenderer;
 				if ((meshRenderer = gameObject.GetComponent<MeshRenderer> ()) == null) {
 						meshRenderer = gameObject.AddComponent<MeshRenderer> ();
 				}
 				meshRenderer.sharedMaterial = material;
-				
-				ProceduralMesh mesh = new ProceduralMesh ();
+		
+				int numVoxels = height * depth * width;
+				ProceduralMesh mesh = new ProceduralMesh (numVoxels * 24, numVoxels * 36);
 				Vector3 vStart = new Vector3 (0.0f, -height * 0.5f + VoxelEngine.instance.halfVoxelSize, 0.0f);
 				for (int y = 0; y < height; y++) {
 						int y1 = y * (depth * width);
@@ -93,7 +94,7 @@ public class VoxelChunk : MonoBehaviour
 												if (HasTop (x, y, z1)) {
 														excludeFaces |= (int)Direction.TOP;
 												}
-												
+						
 												if (HasBottom (x, y, z1)) {
 														excludeFaces |= (int)Direction.BOTTOM;
 												}
@@ -101,7 +102,7 @@ public class VoxelChunk : MonoBehaviour
 												if (HasLeft (x, y1, z1)) {
 														excludeFaces |= (int)Direction.LEFT;
 												}
-												
+						
 												if (HasRight (x, y1, z1)) {
 														excludeFaces |= (int)Direction.RIGHT;
 												}
@@ -113,7 +114,7 @@ public class VoxelChunk : MonoBehaviour
 												if (HasBack (x, y1, z)) {
 														excludeFaces |= (int)Direction.BACK;
 												}
-												
+						
 												Vector3 center = vStart + dStart + hStart;
 												ProceduralMeshes.CreateCube (mesh, VoxelEngine.instance.voxelSize, VoxelEngine.instance.voxelSize, VoxelEngine.instance.voxelSize, center, excludeFaces);
 										}
@@ -123,7 +124,7 @@ public class VoxelChunk : MonoBehaviour
 						}
 						vStart += VoxelEngine.instance.up;
 				}
-				
+		
 				MeshFilter meshFilter;
 				if ((meshFilter = gameObject.GetComponent<MeshFilter> ()) == null) {
 						meshFilter = gameObject.AddComponent<MeshFilter> ();

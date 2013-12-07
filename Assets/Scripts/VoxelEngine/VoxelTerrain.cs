@@ -1,7 +1,9 @@
 using UnityEngine;
+using System;
 using Aubergine.Noise.Module;
 using Aubergine.Noise.NoiseUtils;
 
+[ExecuteInEditMode]
 public class VoxelTerrain : MonoBehaviour
 {
 		public bool useSeed;
@@ -26,6 +28,14 @@ public class VoxelTerrain : MonoBehaviour
 		{
 				return Mathf.RoundToInt (noiseMap.GetValue (x, z) * halfAmplitude + halfAmplitude + minimumHeight);
 		}
+		
+		void Awake ()
+		{
+				Transform child = transform.FindChild ("Single Chunk");
+				if (child != null) {
+						singleChunk = child.gameObject;
+				}
+		}
 	
 		public void Clear ()
 		{
@@ -47,9 +57,10 @@ public class VoxelTerrain : MonoBehaviour
 				Perlin perlin = new Perlin ();
 				perlin.Frequency = 0.5;
 				perlin.Persistence = 0.25;
-				if (useSeed) {
-						perlin.Seed = seed;
+				if (!useSeed) {
+						seed = (int)(DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
 				}
+				perlin.Seed = seed;
 				NoiseMapBuilderPlane heightMapBuilder = new NoiseMapBuilderPlane (width, depth);
 				heightMapBuilder.SetBounds (-halfWidth, halfWidth, -halfDepth, halfDepth);
 				heightMapBuilder.Build (perlin);

@@ -36,174 +36,156 @@ public class ProceduralMeshes
 				hasFrontFace = (excludeFaces & (int)Direction.FRONT) == 0,
 				hasBackFace = (excludeFaces & (int)Direction.BACK) == 0;
 		
-				int i = mesh.vertices.Count;
+				int i = mesh.vertexCount;
 		
 				// back
-				mesh.vertices.AddRange (new Vector3[] {
-					center + new Vector3 (-halfWidth, halfHeight, -halfDepth),   
-					center + new Vector3 (halfWidth, halfHeight, -halfDepth),   
-					center + new Vector3 (halfWidth, -halfHeight, -halfDepth),   
-					center + new Vector3 (-halfWidth, -halfHeight, -halfDepth)
-				});
+				mesh.AddVertex (center + new Vector3 (-halfWidth, halfHeight, -halfDepth)); 
+				mesh.AddVertex (center + new Vector3 (halfWidth, halfHeight, -halfDepth));
+				mesh.AddVertex (center + new Vector3 (halfWidth, -halfHeight, -halfDepth));
+				mesh.AddVertex (center + new Vector3 (-halfWidth, -halfHeight, -halfDepth));
 		
 				// top
-				mesh.vertices.AddRange (new Vector3[] {
-					center + new Vector3 (-halfWidth, halfHeight, halfDepth),   
-					center + new Vector3 (halfWidth, halfHeight, halfDepth),   
-					center + new Vector3 (halfWidth, halfHeight, -halfDepth),   
-					center + new Vector3 (-halfWidth, halfHeight, -halfDepth)
-				});
+				mesh.AddVertex (center + new Vector3 (-halfWidth, halfHeight, halfDepth));
+				mesh.AddVertex (center + new Vector3 (halfWidth, halfHeight, halfDepth)); 
+				mesh.AddVertex (center + new Vector3 (halfWidth, halfHeight, -halfDepth));   
+				mesh.AddVertex (center + new Vector3 (-halfWidth, halfHeight, -halfDepth));
 		
 				// right
-				mesh.vertices.AddRange (new Vector3[] {
-					center + new Vector3 (halfWidth, halfHeight, -halfDepth),    
-					center + new Vector3 (halfWidth, halfHeight, halfDepth),    
-					center + new Vector3 (halfWidth, -halfHeight, halfDepth),    
-					center + new Vector3 (halfWidth, -halfHeight, -halfDepth)
-				});
+				mesh.AddVertex (center + new Vector3 (halfWidth, halfHeight, -halfDepth));
+				mesh.AddVertex (center + new Vector3 (halfWidth, halfHeight, halfDepth));
+				mesh.AddVertex (center + new Vector3 (halfWidth, -halfHeight, halfDepth));
+				mesh.AddVertex (center + new Vector3 (halfWidth, -halfHeight, -halfDepth));
 		
 				// front
-				mesh.vertices.AddRange (new Vector3[] {
-					center + new Vector3 (halfWidth, halfHeight, halfDepth),   
-					center + new Vector3 (-halfWidth, halfHeight, halfDepth),   
-					center + new Vector3 (-halfWidth, -halfHeight, halfDepth),   
-					center + new Vector3 (halfWidth, -halfHeight, halfDepth)
-				});
+				mesh.AddVertex (center + new Vector3 (halfWidth, halfHeight, halfDepth));
+				mesh.AddVertex (center + new Vector3 (-halfWidth, halfHeight, halfDepth));
+				mesh.AddVertex (center + new Vector3 (-halfWidth, -halfHeight, halfDepth));
+				mesh.AddVertex (center + new Vector3 (halfWidth, -halfHeight, halfDepth));
 		
 				// bottom
-				mesh.vertices.AddRange (new Vector3[] {
-					center + new Vector3 (halfWidth, -halfHeight, -halfDepth),   
-					center + new Vector3 (-halfWidth, -halfHeight, -halfDepth),   
-					center + new Vector3 (-halfWidth, -halfHeight, halfDepth),   
-					center + new Vector3 (halfWidth, -halfHeight, halfDepth)
-				});
+				mesh.AddVertex (center + new Vector3 (halfWidth, -halfHeight, -halfDepth));
+				mesh.AddVertex (center + new Vector3 (-halfWidth, -halfHeight, -halfDepth));
+				mesh.AddVertex (center + new Vector3 (-halfWidth, -halfHeight, halfDepth));
+				mesh.AddVertex (center + new Vector3 (halfWidth, -halfHeight, halfDepth));
 		
 				// left
-				mesh.vertices.AddRange (new Vector3[] {
-					center + new Vector3 (-halfWidth, halfHeight, -halfDepth),   
-					center + new Vector3 (-halfWidth, halfHeight, halfDepth),   
-					center + new Vector3 (-halfWidth, -halfHeight, halfDepth),   
-					center + new Vector3 (-halfWidth, -halfHeight, -halfDepth)
-				});
+				mesh.AddVertex (center + new Vector3 (-halfWidth, halfHeight, -halfDepth));
+				mesh.AddVertex (center + new Vector3 (-halfWidth, halfHeight, halfDepth));
+				mesh.AddVertex (center + new Vector3 (-halfWidth, -halfHeight, halfDepth)); 
+				mesh.AddVertex (center + new Vector3 (-halfWidth, -halfHeight, -halfDepth));
 		
-				mesh.normals.AddRange (new Vector3[] {
-					new Vector3 (0.0f, 0.0f, -1.0f),
-					new Vector3 (0.0f, 0.0f, -1.0f),
-					new Vector3 (0.0f, 0.0f, -1.0f),
-					new Vector3 (0.0f, 0.0f, -1.0f)
-				});
+				mesh.AddNormal (new Vector3 (0.0f, 0.0f, -1.0f));
+				mesh.AddNormal (new Vector3 (0.0f, 0.0f, -1.0f));
+				mesh.AddNormal (new Vector3 (0.0f, 0.0f, -1.0f));
+				mesh.AddNormal (new Vector3 (0.0f, 0.0f, -1.0f));
 		
-				mesh.normals.AddRange (new Vector3[] {        
-					new Vector3 (0.0f, 1.0f, 0.0f),
-					new Vector3 (0.0f, 1.0f, 0.0f),
-					new Vector3 (0.0f, 1.0f, 0.0f),
-					new Vector3 (0.0f, 1.0f, 0.0f)
-				});
+				mesh.AddNormal (new Vector3 (0.0f, 1.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (0.0f, 1.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (0.0f, 1.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (0.0f, 1.0f, 0.0f));
 		
-				mesh.normals.AddRange (new Vector3[] {
-					new Vector3 (1.0f, 0.0f, 0.0f),
-					new Vector3 (1.0f, 0.0f, 0.0f),
-					new Vector3 (1.0f, 0.0f, 0.0f),
-					new Vector3 (1.0f, 0.0f, 0.0f)
-				});
+				mesh.AddNormal (new Vector3 (1.0f, 0.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (1.0f, 0.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (1.0f, 0.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (1.0f, 0.0f, 0.0f));
 		
-				mesh.normals.AddRange (new Vector3[] {
-					new Vector3 (0.0f, 0.0f, 1.0f),
-					new Vector3 (0.0f, 0.0f, 1.0f),
-					new Vector3 (0.0f, 0.0f, 1.0f),
-					new Vector3 (0.0f, 0.0f, 1.0f)
-				});
+				mesh.AddNormal (new Vector3 (0.0f, 0.0f, 1.0f));
+				mesh.AddNormal (new Vector3 (0.0f, 0.0f, 1.0f));
+				mesh.AddNormal (new Vector3 (0.0f, 0.0f, 1.0f));
+				mesh.AddNormal (new Vector3 (0.0f, 0.0f, 1.0f));
 		
-				mesh.normals.AddRange (new Vector3[] {
-					new Vector3 (0.0f, -1.0f, 0.0f),
-					new Vector3 (0.0f, -1.0f, 0.0f),
-					new Vector3 (0.0f, -1.0f, 0.0f),
-					new Vector3 (0.0f, -1.0f, 0.0f)
-				});
+				mesh.AddNormal (new Vector3 (0.0f, -1.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (0.0f, -1.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (0.0f, -1.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (0.0f, -1.0f, 0.0f));
 		
-				mesh.normals.AddRange (new Vector3[] {
-					new Vector3 (-1.0f, 0.0f, 0.0f),
-					new Vector3 (-1.0f, 0.0f, 0.0f),
-					new Vector3 (-1.0f, 0.0f, 0.0f),
-					new Vector3 (-1.0f, 0.0f, 0.0f)                        
-				});
+				mesh.AddNormal (new Vector3 (-1.0f, 0.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (-1.0f, 0.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (-1.0f, 0.0f, 0.0f));
+				mesh.AddNormal (new Vector3 (-1.0f, 0.0f, 0.0f));
 
-				mesh.uvs.AddRange (new Vector2[] {
-					new Vector2 (uvRect [0].xMin, uvRect [0].yMin), 
-					new Vector2 (uvRect [0].xMax, uvRect [0].yMin), 
-					new Vector2 (uvRect [0].xMax, uvRect [0].yMax), 
-					new Vector2 (uvRect [0].xMin, uvRect [0].yMax)
-				});
-		
-				mesh.uvs.AddRange (new Vector2[] {
-					new Vector2 (uvRect [1].xMin, uvRect [1].yMin), 
-					new Vector2 (uvRect [1].xMax, uvRect [1].yMin), 
-					new Vector2 (uvRect [1].xMax, uvRect [1].yMax), 
-					new Vector2 (uvRect [1].xMin, uvRect [1].yMax), 
-				});
-		
-				mesh.uvs.AddRange (new Vector2[] {
-					new Vector2 (uvRect [2].xMin, uvRect [2].yMin), 
-					new Vector2 (uvRect [2].xMax, uvRect [2].yMin), 
-					new Vector2 (uvRect [2].xMax, uvRect [2].yMax), 
-					new Vector2 (uvRect [2].xMin, uvRect [2].yMax)
-				});
-		
-				mesh.uvs.AddRange (new Vector2[] {
-					new Vector2 (uvRect [3].xMin, uvRect [3].yMin), 
-					new Vector2 (uvRect [3].xMax, uvRect [3].yMin), 
-					new Vector2 (uvRect [3].xMax, uvRect [3].yMax), 
-					new Vector2 (uvRect [3].xMin, uvRect [3].yMax)
-				});
-		
-				mesh.uvs.AddRange (new Vector2[] {
-					new Vector2 (uvRect [4].xMin, uvRect [4].yMin), 
-					new Vector2 (uvRect [4].xMax, uvRect [4].yMin), 
-					new Vector2 (uvRect [4].xMax, uvRect [4].yMax), 
-					new Vector2 (uvRect [4].xMin, uvRect [4].yMax)
-				});
-		
-				mesh.uvs.AddRange (new Vector2[] {
-					new Vector2 (uvRect [5].xMin, uvRect [5].yMin), 
-					new Vector2 (uvRect [5].xMax, uvRect [5].yMin), 
-					new Vector2 (uvRect [5].xMax, uvRect [5].yMax), 
-					new Vector2 (uvRect [5].xMin, uvRect [5].yMax)
-				});
-		
+				mesh.AddUv (new Vector2 (uvRect [0].xMin, uvRect [0].yMin));
+				mesh.AddUv (new Vector2 (uvRect [0].xMax, uvRect [0].yMin));
+				mesh.AddUv (new Vector2 (uvRect [0].xMax, uvRect [0].yMax));
+				mesh.AddUv (new Vector2 (uvRect [0].xMin, uvRect [0].yMax));
+				
+				mesh.AddUv (new Vector2 (uvRect [1].xMin, uvRect [1].yMin));
+				mesh.AddUv (new Vector2 (uvRect [1].xMax, uvRect [1].yMin));
+				mesh.AddUv (new Vector2 (uvRect [1].xMax, uvRect [1].yMax));
+				mesh.AddUv (new Vector2 (uvRect [1].xMin, uvRect [1].yMax));
+				
+				mesh.AddUv (new Vector2 (uvRect [2].xMin, uvRect [2].yMin));
+				mesh.AddUv (new Vector2 (uvRect [2].xMax, uvRect [2].yMin));
+				mesh.AddUv (new Vector2 (uvRect [2].xMax, uvRect [2].yMax)); 
+				mesh.AddUv (new Vector2 (uvRect [2].xMin, uvRect [2].yMax));
+				
+				mesh.AddUv (new Vector2 (uvRect [3].xMin, uvRect [3].yMin));
+				mesh.AddUv (new Vector2 (uvRect [3].xMax, uvRect [3].yMin));
+				mesh.AddUv (new Vector2 (uvRect [3].xMax, uvRect [3].yMax));
+				mesh.AddUv (new Vector2 (uvRect [3].xMin, uvRect [3].yMax));
+				
+				mesh.AddUv (new Vector2 (uvRect [4].xMin, uvRect [4].yMin));
+				mesh.AddUv (new Vector2 (uvRect [4].xMax, uvRect [4].yMin));
+				mesh.AddUv (new Vector2 (uvRect [4].xMax, uvRect [4].yMax));
+				mesh.AddUv (new Vector2 (uvRect [4].xMin, uvRect [4].yMax));
+				
+				mesh.AddUv (new Vector2 (uvRect [5].xMin, uvRect [5].yMin));
+				mesh.AddUv (new Vector2 (uvRect [5].xMax, uvRect [5].yMin));
+				mesh.AddUv (new Vector2 (uvRect [5].xMax, uvRect [5].yMax)); 
+				mesh.AddUv (new Vector2 (uvRect [5].xMin, uvRect [5].yMax));
+				
 				if (hasFrontFace) {
-						mesh.indices.AddRange (new int[] {
-							i + 12, i + 13, i + 14, i + 12, i + 14, i + 15
-						});
+						mesh.AddIndex (i + 12);
+						mesh.AddIndex (i + 13);
+						mesh.AddIndex (i + 14);
+						mesh.AddIndex (i + 12);
+						mesh.AddIndex (i + 14);
+						mesh.AddIndex (i + 15);
 				}
 		
 				if (hasTopFace) {
-						mesh.indices.AddRange (new int[] {
-							i + 4, i + 5, i + 6, i + 4, i + 6, i + 7
-						});
+						mesh.AddIndex (i + 4);
+						mesh.AddIndex (i + 5);
+						mesh.AddIndex (i + 6);
+						mesh.AddIndex (i + 4);
+						mesh.AddIndex (i + 6);
+						mesh.AddIndex (i + 7);
 				}
 		
 				if (hasRightFace) {
-						mesh.indices.AddRange (new int[] {
-							i + 8, i + 9, i + 10, i + 8, i + 10, i + 11
-						});
+						mesh.AddIndex (i + 8);
+						mesh.AddIndex (i + 9);
+						mesh.AddIndex (i + 10);
+						mesh.AddIndex (i + 8);
+						mesh.AddIndex (i + 10);
+						mesh.AddIndex (i + 11);
 				}
 		
 				if (hasBackFace) {
-						mesh.indices.AddRange (new int[] {
-							i, i + 1, i + 2, i, i + 2, i + 3
-						});
+						mesh.AddIndex (i);
+						mesh.AddIndex (i + 1);
+						mesh.AddIndex (i + 2);
+						mesh.AddIndex (i);
+						mesh.AddIndex (i + 2);
+						mesh.AddIndex (i + 3);
 				}
 		
 				if (hasBottomFace) {
-						mesh.indices.AddRange (new int[] {
-							i + 16, i + 18, i + 17, i + 16, i + 19, i + 18
-						});
+						mesh.AddIndex (i + 16); 
+						mesh.AddIndex (i + 18); 
+						mesh.AddIndex (i + 17); 
+						mesh.AddIndex (i + 16); 
+						mesh.AddIndex (i + 19); 
+						mesh.AddIndex (i + 18);
 				}
 		
 				if (hasLeftFace) {
-						mesh.indices.AddRange (new int[] {
-							i + 20, i + 22, i + 21, i + 20, i + 23, i + 22
-						});
+						mesh.AddIndex (i + 20); 
+						mesh.AddIndex (i + 22); 
+						mesh.AddIndex (i + 21); 
+						mesh.AddIndex (i + 20); 
+						mesh.AddIndex (i + 23); 
+						mesh.AddIndex (i + 22);
 				}
 		}
 	
