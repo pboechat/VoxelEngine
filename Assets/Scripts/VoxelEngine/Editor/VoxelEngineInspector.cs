@@ -18,9 +18,6 @@ public class VoxelEngineInspector : Editor
 	{
 		newVoxelSize = EditorGUILayout.FloatField ("Voxel Size", newVoxelSize);
 		_target.atlas = (Material)EditorGUILayout.ObjectField ("Atlas", _target.atlas, typeof(Material), true);
-		_target.pickingButton = EditorGUILayout.IntField ("Picking Button", _target.pickingButton);
-		_target.pickingDistance = EditorGUILayout.FloatField ("Picking Distance", _target.pickingDistance);
-		_target.camera = (Camera)EditorGUILayout.ObjectField ("Camera", _target.camera, typeof(Camera), true);
 		int tileSize = EditorGUILayout.IntField ("Tile Size", _target.tileSize);
 		if (GUILayout.Button ("Update")) {
 			_target.SetTileSize (tileSize);

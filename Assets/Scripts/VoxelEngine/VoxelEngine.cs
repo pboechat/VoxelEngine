@@ -7,15 +7,6 @@ public class VoxelEngine : Singleton<VoxelEngine>
 	public Material
 		atlas;
 	[SerializeField]
-	public int
-		pickingButton;
-	[SerializeField]
-	public float
-		pickingDistance;
-	[SerializeField]
-	new public Camera
-		camera;
-	[SerializeField]
 	private int
 		_tileSize;
 	[SerializeField]
@@ -143,24 +134,5 @@ public class VoxelEngine : Singleton<VoxelEngine>
 			vPos -= yOffset;
 		}
 	}
-		
-	void Update ()
-	{
-		if (camera == null) {
-			return;
-		}
-		
-		if (Input.GetMouseButtonDown (pickingButton)) {
-			Ray pickingRay = camera.ScreenPointToRay (Input.mousePosition);
-			RaycastHit hitInfo;
-			if (Physics.Raycast (pickingRay, out hitInfo, pickingDistance)) {
-				VoxelChunk chunk = hitInfo.collider.GetComponent<VoxelChunk> ();
-				if (chunk == null) {
-					return;
-				}
-				// TODO: implement different actions
-				chunk.AddVoxelAt (hitInfo.point, 1);
-			}
-		}
-	}
+
 }
