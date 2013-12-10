@@ -370,7 +370,7 @@ public class VoxelChunk : MonoBehaviour
 
 		// FIXME: checking invariants
 		if (data [voxelIndex] != 0) {
-			throw new Exception ("data [voxelIndex] != 0");
+			throw new Exception ("data [voxelIndex] != 0 (" + data [voxelIndex] + ")");
 		}
 		
 		data [voxelIndex] = voxelId;
@@ -489,7 +489,7 @@ public class VoxelChunk : MonoBehaviour
 			indices [baseIndex + 29] = baseVertex + 18;
 		}
 		
-		if ((neighborVoxelIndex = GetLeftVoxelIndex (x, y1, z1)) == -1 && data [neighborVoxelIndex] == 0) {
+		if ((neighborVoxelIndex = GetLeftVoxelIndex (x, y1, z1)) != -1 && data [neighborVoxelIndex] != 0) {
 			// right
 			neighborBaseVertex = neighborVoxelIndex * 24;
 			neighborBaseIndex = neighborVoxelIndex * 36;
