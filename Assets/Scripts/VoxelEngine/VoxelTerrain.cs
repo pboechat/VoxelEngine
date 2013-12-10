@@ -96,7 +96,7 @@ public class VoxelTerrain : MonoBehaviour
 		chunk.depth = 12;
 		chunk.height = 12;
 		chunk.data = data;
-		chunk.Build (true);
+		chunk.Build ();
 		return chunk;
 	}
 	
@@ -107,7 +107,7 @@ public class VoxelTerrain : MonoBehaviour
 			enabled = false;
 			return;
 		}
-				
+		
 		Clear ();
 				
 		float naturalScale = 1.0f / Mathf.Sqrt ((float)width * depth);

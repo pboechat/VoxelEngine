@@ -139,55 +139,8 @@ public class ProceduralMeshes
 		mesh.AddUv (new Vector2 (uvRect [5].xMax, uvRect [5].yMax));
 		mesh.AddUv (new Vector2 (uvRect [5].xMax, uvRect [5].yMin)); 
 		mesh.AddUv (new Vector2 (uvRect [5].xMin, uvRect [5].yMin));
-				
-		if (hasFrontFace) {
-			mesh.AddIndex (i + 12);
-			mesh.AddIndex (i + 13);
-			mesh.AddIndex (i + 14);
-			mesh.AddIndex (i + 12);
-			mesh.AddIndex (i + 14);
-			mesh.AddIndex (i + 15);
-		} else {
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-		}
 		
-		if (hasTopFace) {
-			mesh.AddIndex (i + 4);
-			mesh.AddIndex (i + 5);
-			mesh.AddIndex (i + 6);
-			mesh.AddIndex (i + 4);
-			mesh.AddIndex (i + 6);
-			mesh.AddIndex (i + 7);
-		} else {
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-		}
-		
-		if (hasRightFace) {
-			mesh.AddIndex (i + 8);
-			mesh.AddIndex (i + 9);
-			mesh.AddIndex (i + 10);
-			mesh.AddIndex (i + 8);
-			mesh.AddIndex (i + 10);
-			mesh.AddIndex (i + 11);
-		} else {
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-			mesh.AddIndex (0);
-		}
-		
+		// back
 		if (hasBackFace) {
 			mesh.AddIndex (i);
 			mesh.AddIndex (i + 1);
@@ -204,6 +157,58 @@ public class ProceduralMeshes
 			mesh.AddIndex (0);
 		}
 		
+		// top
+		if (hasTopFace) {
+			mesh.AddIndex (i + 4);
+			mesh.AddIndex (i + 5);
+			mesh.AddIndex (i + 6);
+			mesh.AddIndex (i + 4);
+			mesh.AddIndex (i + 6);
+			mesh.AddIndex (i + 7);
+		} else {
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+		}
+		
+		// right
+		if (hasRightFace) {
+			mesh.AddIndex (i + 8);
+			mesh.AddIndex (i + 9);
+			mesh.AddIndex (i + 10);
+			mesh.AddIndex (i + 8);
+			mesh.AddIndex (i + 10);
+			mesh.AddIndex (i + 11);
+		} else {
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+		}		
+		
+		// front
+		if (hasFrontFace) {
+			mesh.AddIndex (i + 12);
+			mesh.AddIndex (i + 13);
+			mesh.AddIndex (i + 14);
+			mesh.AddIndex (i + 12);
+			mesh.AddIndex (i + 14);
+			mesh.AddIndex (i + 15);
+		} else {
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+			mesh.AddIndex (0);
+		}
+
+		// bottom		
 		if (hasBottomFace) {
 			mesh.AddIndex (i + 16); 
 			mesh.AddIndex (i + 18); 
@@ -220,6 +225,7 @@ public class ProceduralMeshes
 			mesh.AddIndex (0);
 		}
 		
+		// left
 		if (hasLeftFace) {
 			mesh.AddIndex (i + 20); 
 			mesh.AddIndex (i + 22); 
