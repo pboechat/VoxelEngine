@@ -20,6 +20,9 @@ public class VoxelChunk : MonoBehaviour
 	public int depth;
 	public byte[] data;
 	[SerializeField]
+	private bool
+		built = false;
+	[SerializeField]
 	private MeshFilter
 		meshFilter;
 	[SerializeField]
@@ -31,7 +34,54 @@ public class VoxelChunk : MonoBehaviour
 	[SerializeField]
 	private Vector3
 		offset;
-	
+	private bool batchMode = false;
+	private int[] temporaryIndices;
+	private Vector2[] temporaryUvs;
+
+	void Start ()
+	{
+		if (!built) {
+			Build ();
+		}
+	}
+
+	public void StartBatchMode ()
+	{
+		// FIXME: checking invariants
+		if (!built) {
+			throw new Exception ("!built");
+		}
+
+		if (batchMode) {
+			throw new Exception ("already in batch mode");
+		}
+
+		batchMode = true;
+		temporaryIndices = chunkMesh.triangles;
+		temporaryUvs = chunkMesh.uv;
+	}
+
+	public void EndBatchMode ()
+	{
+		// FIXME: checking invariants
+		if (!built) {
+			throw new Exception ("!built");
+		}
+
+		if (!batchMode) {
+			throw new Exception ("not in batch mode");
+		}
+
+		chunkMesh.triangles = temporaryIndices;
+		chunkMesh.uv = temporaryUvs;
+		chunkMesh.RecalculateBounds ();
+		// necessary to update mesh collider in Unity 4.x
+		meshCollider.sharedMesh = null;
+		meshCollider.sharedMesh = chunkMesh;
+
+		batchMode = false;
+	}
+
 	bool HasTop (int x, int y, int z1)
 	{
 		if (y == height - 1) {
@@ -140,18 +190,9 @@ public class VoxelChunk : MonoBehaviour
 		return y1 + (z + 1) * width + x;
 	}
 
-	public bool QueryVoxel (Vector3 point, out int x, out int y, out int z)
+	public bool QueryVoxel (int x, int y, int z)
 	{
-		Vector3 localPoint = transform.worldToLocalMatrix.MultiplyPoint3x4 (point);
-		Vector3 voxelCoordinates = offset + (localPoint / VoxelEngine.instance.voxelSize);
-		
-		x = Mathf.FloorToInt (voxelCoordinates.x);
-		y = Mathf.FloorToInt (voxelCoordinates.y);
-		z = Mathf.FloorToInt (voxelCoordinates.z);
-		
-		int voxelIndex = y * (depth * width) + z * width + x;
-		
-		return (data [voxelIndex] != 0);
+		return (data [y * (depth * width) + z * width + x] != 0);
 	}
 
 	void FindVoxel (Vector3 point, out int x, out int y, out int z)
@@ -258,6 +299,11 @@ public class VoxelChunk : MonoBehaviour
 		
 	public void AddVoxel (byte voxelId, Vector3 point)
 	{
+		// FIXME: checking invariants
+		if (!built) {
+			throw new Exception ("!built");
+		}
+
 		int x, y, z;
 		FindAdjacentEmptyVoxel (point, out x, out y, out z);
 		AddVoxel (voxelId, x, y, z);
@@ -265,6 +311,11 @@ public class VoxelChunk : MonoBehaviour
 
 	public void AddVoxel (byte voxelId, int x, int y, int z)
 	{
+		// FIXME: checking invariants
+		if (!built) {
+			throw new Exception ("!built");
+		}
+
 		// DEBUG:
 		//Debug.Log ("- Trying to add voxel [chunk=(" + this.x + ", " + this.y + ", " + this.z + "), voxel=(" + x + ", " + y + ", " + z + ")]");
 		
@@ -397,8 +448,8 @@ public class VoxelChunk : MonoBehaviour
 		int baseVertex = voxelIndex * 24;
 		int baseIndex = voxelIndex * 36;
 		
-		int[] indices = chunkMesh.triangles;
-		Vector2[] uvs = chunkMesh.uv;
+		int[] indices = (batchMode) ? temporaryIndices : chunkMesh.triangles;
+		Vector2[] uvs = (batchMode) ? temporaryUvs : chunkMesh.uv;
 		
 		bool hasTopNeighbor;
 		
@@ -562,17 +613,24 @@ public class VoxelChunk : MonoBehaviour
 		uvs [baseVertex + 13] = new Vector2 (uvRect.xMax, uvRect.yMax);
 		uvs [baseVertex + 14] = new Vector2 (uvRect.xMax, uvRect.yMin);
 		uvs [baseVertex + 15] = new Vector2 (uvRect.xMin, uvRect.yMin);
-		
-		chunkMesh.triangles = indices;
-		chunkMesh.uv = uvs;
-		chunkMesh.RecalculateBounds ();
-		// necessary to update mesh collider in Unity 4.x
-		meshCollider.sharedMesh = null;
-		meshCollider.sharedMesh = chunkMesh;
+
+		if (!batchMode) {
+			chunkMesh.triangles = indices;
+			chunkMesh.uv = uvs;
+			chunkMesh.RecalculateBounds ();
+			// necessary to update mesh collider in Unity 4.x
+			meshCollider.sharedMesh = null;
+			meshCollider.sharedMesh = chunkMesh;
+		}
 	}
 
 	public void RemoveVoxel (Vector3 point)
 	{
+		// FIXME: checking invariants
+		if (!built) {
+			throw new Exception ("!built");
+		}
+
 		int x, y, z;
 		FindVoxel (point, out x, out y, out z);
 		RemoveVoxel (x, y, z);
@@ -580,6 +638,11 @@ public class VoxelChunk : MonoBehaviour
 
 	public void RemoveVoxel (int x, int y, int z)
 	{
+		// FIXME: checking invariants
+		if (!built) {
+			throw new Exception ("!built");
+		}
+
 		// DEBUG:
 		//Debug.Log ("- Trying to remove voxel [chunk=(" + this.x + ", " + this.y + ", " + this.z + "), voxel=(" + x + ", " + y + ", " + z + ")]");
 		
@@ -602,7 +665,7 @@ public class VoxelChunk : MonoBehaviour
 		
 		int baseIndex = voxelIndex * 36;
 		
-		int[] indices = chunkMesh.triangles;
+		int[] indices = (batchMode) ? temporaryIndices : chunkMesh.triangles;
 		
 		// remove front face from current voxel
 		indices [baseIndex] = 0;
@@ -728,11 +791,13 @@ public class VoxelChunk : MonoBehaviour
 			indices [neighborBaseIndex + 35] = neighborBaseVertex + 22;
 		}
 
-		chunkMesh.triangles = indices;
-		chunkMesh.RecalculateBounds ();
-		// necessary to update mesh collider in Unity 4.x
-		meshCollider.sharedMesh = null;
-		meshCollider.sharedMesh = chunkMesh;
+		if (!batchMode) {
+			chunkMesh.triangles = indices;
+			chunkMesh.RecalculateBounds ();
+			// necessary to update mesh collider in Unity 4.x
+			meshCollider.sharedMesh = null;
+			meshCollider.sharedMesh = chunkMesh;
+		}
 	}
 	
 	public void Build ()
@@ -840,5 +905,7 @@ public class VoxelChunk : MonoBehaviour
 			meshRenderer = gameObject.AddComponent<MeshRenderer> ();
 		}
 		meshRenderer.sharedMaterial = VoxelEngine.instance.atlas;
+
+		built = true;
 	}
 }

@@ -5,8 +5,9 @@ using System;
 [RequireComponent(typeof(Rigidbody))]
 public class Boulder : MonoBehaviour
 {
-	private VoxelRemover explosionQueryPrefab;
-	ParticleEmitter smokePrefab;
+	public delegate void CollisionCallback (Vector3 point);
+
+	private CollisionCallback collisionCallback;
 	private bool launched = false;
 	private float launchTime = -1;
 	private bool collided = false;
@@ -18,10 +19,9 @@ public class Boulder : MonoBehaviour
 		rigidbody.isKinematic = true;
 	}
 
-	public void Launch (float strength, VoxelRemover explosionQueryPrefab, ParticleEmitter smokePrefab)
+	public void Launch (float strength, CollisionCallback collisionCallback)
 	{
-		this.explosionQueryPrefab = explosionQueryPrefab;
-		this.smokePrefab = smokePrefab;
+		this.collisionCallback = collisionCallback;
 		rigidbody.isKinematic = false;
 		rigidbody.AddForce (transform.TransformDirection (new Vector3 (0.0f, 0.7f, 0.7f)) * strength, ForceMode.Impulse);
 		launchTime = Time.time;
@@ -33,19 +33,8 @@ public class Boulder : MonoBehaviour
 		if (collided) {
 			return;
 		}
-		
-		// FIXME: checking invariants
-		if (explosionQueryPrefab == null) {
-			throw new Exception ("explosionQueryPrefab == null");
-		}
-	
-		Vector3 hitPoint = collision.contacts [0].point;
-		
-		VoxelRemover explosionQuery = (VoxelRemover)Instantiate (explosionQueryPrefab, hitPoint, Quaternion.identity);
-		explosionQuery.Execute ();
-		Destroy (explosionQuery.gameObject);
-		
-		Instantiate (smokePrefab, hitPoint, Quaternion.identity);
+
+		collisionCallback (collision.contacts [0].point);
 		
 		collided = true;
 		collisionTime = Time.time;

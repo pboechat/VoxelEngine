@@ -5,9 +5,9 @@ using System;
 [CustomEditor (typeof(VoxelEngine))]
 public class VoxelEngineInspector : Editor
 {
-	VoxelEngine _target;
-	float newVoxelSize;
-	int newTileSize;
+	private VoxelEngine _target;
+	private float newVoxelSize;
+	private int newTileSize;
 	
 	void OnEnable ()
 	{
@@ -25,12 +25,6 @@ public class VoxelEngineInspector : Editor
 			_target.SetTileSize (newTileSize);
 			_target.SetVoxelSize (newVoxelSize);
 		}
-		/*SerializedProperty tileMapsProperty = serializedObject.FindProperty ("_tileMaps");
-				EditorGUI.BeginChangeCheck ();
-				EditorGUILayout.PropertyField (tileMapsProperty, true);
-				if (EditorGUI.EndChangeCheck ()) {
-						serializedObject.ApplyModifiedProperties ();
-				}*/
 		
 		if (GUI.changed) {
 			EditorUtility.SetDirty (_target);

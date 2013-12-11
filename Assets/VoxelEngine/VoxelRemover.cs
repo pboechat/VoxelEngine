@@ -1,7 +1,22 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class VoxelRemover : MonoBehaviour
 {
+	private struct VoxelPosition
+	{
+		public int x;
+		public int y;
+		public int z;
+
+		public VoxelPosition (int x, int y, int z)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+	}
+
 	[SerializeField]
 	public int
 		queryWidth;
@@ -20,6 +35,8 @@ public class VoxelRemover : MonoBehaviour
 	[SerializeField]
 	private GameObject
 		area = null;
+	private VoxelQuery query;
+	private Dictionary<VoxelChunk, List<VoxelPosition>> queryResults;
 	private static Material voxelRemoverMaterial = null;
 		
 	Material GetVoxelRemoverMaterial ()
@@ -28,6 +45,11 @@ public class VoxelRemover : MonoBehaviour
 			voxelRemoverMaterial = new Material (Shader.Find ("Diffuse"));
 		}
 		return voxelRemoverMaterial;
+	}
+
+	void Start ()
+	{
+		BuildQuery ();
 	}
 	
 	public void DisplayArea ()
@@ -86,6 +108,13 @@ public class VoxelRemover : MonoBehaviour
 		}
 		meshRenderer.sharedMaterial = GetVoxelRemoverMaterial ();
 	}
+
+	void BuildQuery ()
+	{
+		query = new VoxelQuery (transform.position, queryWidth, queryHeight, queryDepth, queryMask, ExecuteQueryCallback);
+		query.prepareCallback = PrepareQueryCallback;
+		query.disposeCallback = DisposeQueryCallback;
+	}
 	
 	public void Execute ()
 	{
@@ -94,16 +123,47 @@ public class VoxelRemover : MonoBehaviour
 			return;
 		}
 	
-		VoxelQuery query = new VoxelQuery (transform.position, queryWidth, queryHeight, queryDepth, queryMask, QueryCallback);
+		BuildQuery ();
 		terrain.ExecuteQuery (query);
 	}
+
+	void PrepareQueryCallback ()
+	{
+		queryResults = new Dictionary<VoxelChunk, List<VoxelPosition>> ();
+	}
 	
-	bool QueryCallback (VoxelChunk chunk, int voxelX, int voxelY, int voxelZ)
+	bool ExecuteQueryCallback (VoxelChunk chunk, int voxelX, int voxelY, int voxelZ)
 	{
 		// DEBUG:
 		//Debug.Log ("- Removing voxel [chunk=(" + chunk.x + ", " + chunk.y + ", " + chunk.z + "), voxel=(" + voxelX + ", " + voxelY + ", " + voxelZ + ")]");
-		chunk.RemoveVoxel (voxelX, voxelY, voxelZ);
+		List<VoxelPosition> voxelPositions;
+		if (!queryResults.TryGetValue (chunk, out voxelPositions)) {
+			voxelPositions = new List<VoxelPosition> ();
+			queryResults.Add (chunk, voxelPositions);
+		}
+		voxelPositions.Add (new VoxelPosition (voxelX, voxelY, voxelZ));
 		return true;
+	}
+
+	void DisposeQueryCallback ()
+	{
+		foreach (VoxelChunk chunk in queryResults.Keys) {
+			chunk.StartBatchMode ();
+		}
+
+		foreach (KeyValuePair<VoxelChunk, List<VoxelPosition>> queryResult in queryResults) {
+			VoxelChunk chunk = queryResult.Key;
+			foreach (VoxelPosition voxelPosition in queryResult.Value) {
+				chunk.RemoveVoxel (voxelPosition.x, voxelPosition.y, voxelPosition.z);
+			}
+		}
+
+		foreach (VoxelChunk chunk in queryResults.Keys) {
+			chunk.EndBatchMode ();
+		}
+
+		queryResults.Clear ();
+		queryResults = null;
 	}
 
 }

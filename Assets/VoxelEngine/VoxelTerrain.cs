@@ -23,7 +23,8 @@ public class VoxelTerrain : MonoBehaviour
 	public int maximumHeight;
 	public float scale;
 	public float smoothness;
-	public bool buildOnStart;
+	public bool buildOnStart = true;
+	public bool hideChunks = true;
 	public ResizeDirection resizeDirection;
 	private NoiseMap noiseMap;
 	private float halfAmplitude;
@@ -67,45 +68,57 @@ public class VoxelTerrain : MonoBehaviour
 	{
 		return Mathf.RoundToInt (noiseMap.GetValue (x, z) * halfAmplitude + halfAmplitude + minimumHeight);
 	}
-	
+
 	public void ExecuteQuery (VoxelQuery query)
 	{
+		query.Prepare ();
+
+		// cached calculations
 		Vector3 localPosition = transform.worldToLocalMatrix.MultiplyPoint3x4 (query.position);
 		Vector3 queryCenter = new Vector3 (Mathf.FloorToInt (localPosition.x) + VoxelEngine.instance.halfVoxelSize,
 		                                   Mathf.FloorToInt (localPosition.y) + VoxelEngine.instance.halfVoxelSize,
 		                                   Mathf.FloorToInt (localPosition.z) + VoxelEngine.instance.halfVoxelSize);
 		int gridDepth_x_gridWidth = gridDepth * gridWidth;
-		int i = 0;
 		float queryYOffset = (-query.height * 0.5f) * VoxelEngine.instance.voxelSize;
 		float queryZOffset = (-query.depth * 0.5f) * VoxelEngine.instance.voxelSize;
 		float queryXOffset = (-query.width * 0.5f) * VoxelEngine.instance.voxelSize;
+
 		float chunkSide = VoxelEngine.instance.voxelSize * 12;
+		float halfChunkSize = chunkSide * 0.5f;
+		Vector3 chunkOffset = new Vector3 (halfChunkSize, halfChunkSize, halfChunkSize);
 		Vector3 gridOffset = new Vector3 (width * 0.5f, 0.0f, depth * 0.5f);
+
+		// find chunk and voxel starting bounds
+
+		int cX1 = -1; // chunk starting x bound
+		int cY1 = -1; // chunk starting y bound
+		int cZ1 = -1; // chunk starting z bound
+		int vX1 = -1; // voxel starting x bound
+		int vY1 = -1; // voxel starting y bound
+		int vZ1 = -1; // voxel starting z bound
+		VoxelChunk chunk;
+		int x1 = 0, y1 = 0, z1 = 0;
 		Vector3 yStart = new Vector3 (0.0f, queryYOffset, 0.0f);
-		for (int y = 0; y < query.height; y++) {
+		for (y1 = 0; y1 < query.height; y1++) {
 			Vector3 zStart = new Vector3 (0.0f, 0.0f, queryZOffset);
-			for (int z = 0; z < query.depth; z++) {
+			for (z1 = 0; z1 < query.depth; z1++) {
 				Vector3 xStart = new Vector3 (queryXOffset, 0.0f, 0.0f);
-				for (int x = 0; x < query.width; x++) {
-					if (query.mask [i++]) {
-						Vector3 voxelCenter = queryCenter + yStart + zStart + xStart;
-						Vector3 gridPosition = gridOffset + voxelCenter;
-						int chunkX = Mathf.FloorToInt (gridPosition.x / chunkSide);
-						int chunkY = Mathf.FloorToInt (gridPosition.y / chunkSide);
-						int chunkZ = Mathf.FloorToInt (gridPosition.z / chunkSide);
-						
-						// ignore queries outside of terrain bounds
-						if (chunkX < 0 || chunkX >= gridWidth || chunkY < 0 || chunkY >= gridHeight || chunkZ < 0 || chunkZ >= gridDepth) {
-							continue;
-						}
-						
-						VoxelChunk chunk = grid [chunkY * gridDepth_x_gridWidth + chunkZ * gridWidth + chunkX];
-						if (chunk != null) {
-							int voxelX, voxelY, voxelZ;
-							if (chunk.QueryVoxel (voxelCenter, out voxelX, out voxelY, out voxelZ)) {
-								query.Execute (chunk, voxelX, voxelY, voxelZ);
-							}
-						}
+				for (x1 = 0; x1 < query.width; x1++) {
+					Vector3 voxelCenter = queryCenter + yStart + zStart + xStart;
+					Vector3 gridPosition = gridOffset + voxelCenter;
+
+					cX1 = Mathf.FloorToInt (gridPosition.x / chunkSide);
+					cY1 = Mathf.FloorToInt (gridPosition.y / chunkSide);
+					cZ1 = Mathf.FloorToInt (gridPosition.z / chunkSide);
+
+					if (cX1 >= 0 && cX1 < gridWidth && cY1 >= 0 && cY1 < gridHeight && cZ1 >= 0 && cZ1 < gridDepth) {
+						// valid grid position found, calculate voxel starting bounds and break
+						Vector3 chunkStart = new Vector3 (cX1 * chunkSide, cY1 * chunkSide, cZ1 * chunkSide);
+						Vector3 voxelPosition = (gridPosition - chunkStart);
+						vX1 = Mathf.FloorToInt (voxelPosition.x);
+						vY1 = Mathf.FloorToInt (voxelPosition.y);
+						vZ1 = Mathf.FloorToInt (voxelPosition.z);
+						goto ChunkAndVoxelBoundsFound;
 					}
 					xStart += VoxelEngine.instance.right;
 				}
@@ -113,6 +126,74 @@ public class VoxelTerrain : MonoBehaviour
 			}
 			yStart += VoxelEngine.instance.up;
 		}
+
+	ChunkAndVoxelBoundsFound:
+		if (cX1 == -1 && cY1 == -1 && cZ1 == -1 && vX1 == -1 && vY1 == -1 && vZ1 == -1) {
+			// no valid grid position found for query, exit
+			query.Dispose ();
+			return;
+		}
+
+		// FIXME: checkin invariants
+		if (!(cX1 > -1 && cY1 > -1 && cZ1 > -1 && vX1 > -1 && vY1 > -1 && vZ1 > -1)) {
+			throw new Exception ("!(chunkX > -1 && chunkY > -1 && chunkZ > -1 && voxelX > -1 && voxelY > -1 && voxelZ > -1)");
+		}
+
+		int cX2, cY2, cZ2; // current chunk x,y,z bounds
+		int vX2, vY2, vZ2; // current voxel x,y,z bounds
+		int i = y1 * query.depth * query.width + z1 * query.width + x1;
+		// set current y bounds to start
+		cY2 = cY1;
+		vY2 = vY1;
+		int cZ2_x_gridWidth;
+		for (int y2 = y1; y2 < query.height; y2++) {
+			// set current z bounds to start
+			cZ2 = cZ1;
+			cZ2_x_gridWidth = cZ2 * gridWidth;
+			vZ2 = vZ1;
+			for (int z2 = z1; z2 < query.depth; z2++) {
+				// set current x bounds to start
+				cX2 = cX1;
+				vX2 = vX1;
+				for (int x2 = x1; x2 < query.width; x2++) {
+					if (query.mask [i++]) {
+						chunk = grid [cY2 * gridDepth_x_gridWidth + cZ2_x_gridWidth + cX2];
+						// if chunk is filled and voxel space is not empty, execute query
+						if (chunk != null && chunk.QueryVoxel (vX2, vY2, vZ2)) {
+							query.Execute (chunk, vX2, vY2, vZ2);
+						}
+					}
+					if (++vX2 >= 12) {
+						// leaving chunk bounds, reset current voxel x bound and increment current chunk x bound
+						vX2 = 0;
+						if (++cX2 >= gridWidth) {
+							// leaving grid grounds, break current loop
+							break;
+						}
+					}
+				}
+				if (++vZ2 >= 12) {
+					// leaving chunk bounds, reset current voxel z bound and increment current chunk z bound
+					vZ2 = 0;
+					if (++cZ2 >= gridDepth) {
+						// leaving grid grounds, break current loop
+						break;
+					} else {
+						cZ2_x_gridWidth = cZ2 * gridWidth;
+					}
+				}
+			}
+			if (++vY2 >= 12) {
+				// leaving chunk bounds, reset current voxel y bound and increment current chunk y bound
+				vY2 = 0;
+				if (++cY2 >= gridHeight) {
+					// leaving grid grounds, break current loop
+					break;
+				}
+			}
+		}
+
+		query.Dispose ();
 	}
 	
 	public void Clear ()
@@ -128,10 +209,13 @@ public class VoxelTerrain : MonoBehaviour
 		}
 	}
 		
-	VoxelChunk BuildChunk (int x, int y, int z, Vector3 position, byte[] data)
+	VoxelChunk BuildChunk (int x, int y, int z, Vector3 position, byte[] data, bool isStatic = false)
 	{
 		GameObject gameObject = new GameObject ("Chunk (" + x + ", " + y + ", " + z + ")");
-		gameObject.hideFlags = HideFlags.HideInHierarchy;
+		gameObject.isStatic = isStatic;
+		if (hideChunks) {
+			gameObject.hideFlags = HideFlags.HideInHierarchy;
+		}
 		gameObject.transform.parent = transform;
 		gameObject.transform.localPosition = position;
 		gameObject.transform.localRotation = Quaternion.identity;
@@ -148,13 +232,15 @@ public class VoxelTerrain : MonoBehaviour
 		return chunk;
 	}
 	
-	public void Build ()
+	public void Build (bool isStatic = false)
 	{
 		if (width < 1 || depth < 1 || height < 1 || maximumHeight < 1) {
 			Debug.LogError ("width or depth or height or maximumHeight < 1");
 			enabled = false;
 			return;
 		}
+
+		gameObject.isStatic = isStatic;
 		
 		Clear ();
 				
@@ -228,7 +314,7 @@ public class VoxelTerrain : MonoBehaviour
 					VoxelChunk chunk;
 					if (filled) {
 						Vector3 chunkPosition = gridCenter + new Vector3 (chunkWidth * VoxelEngine.instance.voxelSize + halfChunkSide, chunkY * chunkSide + halfChunkSide, chunkDepth * VoxelEngine.instance.voxelSize + halfChunkSide);
-						chunk = BuildChunk (chunkX, chunkY, chunkZ, chunkPosition, data);
+						chunk = BuildChunk (chunkX, chunkY, chunkZ, chunkPosition, data, isStatic);
 					} else {
 						chunk = null;
 					}
