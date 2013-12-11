@@ -572,43 +572,46 @@ public class VoxelChunk : MonoBehaviour
 			indices [baseIndex + 35] = baseVertex + 22;
 		}
 
+		int frontFaceTileId, topFaceTileId, rightFaceTileId, backFaceTileId, bottomFaceTileId, leftFaceTileId;
+		VoxelEngine.instance.GetVoxelIdFaceMapping (voxelId, out frontFaceTileId, out topFaceTileId, out rightFaceTileId, out backFaceTileId, out bottomFaceTileId, out leftFaceTileId);
+
 		// front
-		Rect uvRect = VoxelEngine.instance.GetTileUv ((byte)((hasTopNeighbor) ? 3 : 4));
+		Rect uvRect = VoxelEngine.instance.GetTileUv (frontFaceTileId);
 		uvs [baseVertex] = new Vector2 (uvRect.xMin, uvRect.yMax);
 		uvs [baseVertex + 1] = new Vector2 (uvRect.xMax, uvRect.yMax);
 		uvs [baseVertex + 2] = new Vector2 (uvRect.xMax, uvRect.yMin);
 		uvs [baseVertex + 3] = new Vector2 (uvRect.xMin, uvRect.yMin);
 		
 		// top
-		uvRect = VoxelEngine.instance.GetTileUv ((byte)1);
+		uvRect = VoxelEngine.instance.GetTileUv (topFaceTileId);
 		uvs [baseVertex + 4] = new Vector2 (uvRect.xMin, uvRect.yMax);
 		uvs [baseVertex + 5] = new Vector2 (uvRect.xMax, uvRect.yMax);
 		uvs [baseVertex + 6] = new Vector2 (uvRect.xMax, uvRect.yMin);
 		uvs [baseVertex + 7] = new Vector2 (uvRect.xMin, uvRect.yMin);
 		
 		// right
-		uvRect = VoxelEngine.instance.GetTileUv ((byte)((hasTopNeighbor) ? 3 : 4));
+		uvRect = VoxelEngine.instance.GetTileUv (rightFaceTileId);
 		uvs [baseVertex + 8] = new Vector2 (uvRect.xMin, uvRect.yMax);
 		uvs [baseVertex + 9] = new Vector2 (uvRect.xMax, uvRect.yMax);
 		uvs [baseVertex + 10] = new Vector2 (uvRect.xMax, uvRect.yMin); 
 		uvs [baseVertex + 11] = new Vector2 (uvRect.xMin, uvRect.yMin);		
 		
 		// back
-		uvRect = VoxelEngine.instance.GetTileUv ((byte)3);
+		uvRect = VoxelEngine.instance.GetTileUv (backFaceTileId);
 		uvs [baseVertex + 16] = new Vector2 (uvRect.xMin, uvRect.yMin);
 		uvs [baseVertex + 17] = new Vector2 (uvRect.xMax, uvRect.yMin);
 		uvs [baseVertex + 18] = new Vector2 (uvRect.xMax, uvRect.yMax);
 		uvs [baseVertex + 19] = new Vector2 (uvRect.xMin, uvRect.yMax);
 		
 		// bottom
-		uvRect = VoxelEngine.instance.GetTileUv ((byte)((hasTopNeighbor) ? 3 : 4));
+		uvRect = VoxelEngine.instance.GetTileUv (bottomFaceTileId);
 		uvs [baseVertex + 20] = new Vector2 (uvRect.xMin, uvRect.yMax);
 		uvs [baseVertex + 21] = new Vector2 (uvRect.xMax, uvRect.yMax);
 		uvs [baseVertex + 22] = new Vector2 (uvRect.xMax, uvRect.yMin); 
 		uvs [baseVertex + 23] = new Vector2 (uvRect.xMin, uvRect.yMin);	
 		
 		// left
-		uvRect = VoxelEngine.instance.GetTileUv ((byte)((hasTopNeighbor) ? 3 : 4));
+		uvRect = VoxelEngine.instance.GetTileUv (leftFaceTileId);
 		uvs [baseVertex + 12] = new Vector2 (uvRect.xMin, uvRect.yMax);
 		uvs [baseVertex + 13] = new Vector2 (uvRect.xMax, uvRect.yMax);
 		uvs [baseVertex + 14] = new Vector2 (uvRect.xMax, uvRect.yMin);
@@ -836,7 +839,8 @@ public class VoxelChunk : MonoBehaviour
 				Vector3 xStart = new Vector3 (xOffset, 0.0f, 0.0f);
 				for (int x = 0; x < width; x++) {
 					Vector3 center = yStart + zStart + xStart;
-					if (data [y1 + z1 + x] > 0) {
+					byte voxelId = data [y1 + z1 + x];
+					if (voxelId > 0) {
 						int excludeFaces = 0;
 						
 						if (HasFront (x, y1, z)) {
@@ -864,18 +868,21 @@ public class VoxelChunk : MonoBehaviour
 							excludeFaces |= (int)Direction.LEFT;
 						}
 
+						int frontFaceTileId, topFaceTileId, rightFaceTileId, backFaceTileId, bottomFaceTileId, leftFaceTileId;
+						VoxelEngine.instance.GetVoxelIdFaceMapping (voxelId, out frontFaceTileId, out topFaceTileId, out rightFaceTileId, out backFaceTileId, out bottomFaceTileId, out leftFaceTileId);
+
 						// front
-						uvRects [0] = VoxelEngine.instance.GetTileUv ((byte)((hasTop) ? 3 : 4));
+						uvRects [0] = VoxelEngine.instance.GetTileUv (frontFaceTileId);
 						// top
-						uvRects [1] = VoxelEngine.instance.GetTileUv ((byte)1);
+						uvRects [1] = VoxelEngine.instance.GetTileUv (topFaceTileId);
 						// right
-						uvRects [2] = VoxelEngine.instance.GetTileUv ((byte)((hasTop) ? 3 : 4));
+						uvRects [2] = VoxelEngine.instance.GetTileUv (rightFaceTileId);
 						// back
-						uvRects [3] = VoxelEngine.instance.GetTileUv ((byte)((hasTop) ? 3 : 4));
+						uvRects [3] = VoxelEngine.instance.GetTileUv (backFaceTileId);
 						// bottom
-						uvRects [4] = VoxelEngine.instance.GetTileUv ((byte)3);
+						uvRects [4] = VoxelEngine.instance.GetTileUv (bottomFaceTileId);
 						// left
-						uvRects [5] = VoxelEngine.instance.GetTileUv ((byte)((hasTop) ? 3 : 4));
+						uvRects [5] = VoxelEngine.instance.GetTileUv (leftFaceTileId);
 
 						ProceduralMeshes.CreateCube (mesh, VoxelEngine.instance.voxelSize, VoxelEngine.instance.voxelSize, VoxelEngine.instance.voxelSize, center, uvRects, excludeFaces);
 					} else {

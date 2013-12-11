@@ -114,9 +114,9 @@ public class CatapultController : MonoBehaviour
 	[SerializeField]
 	private Vector3
 		boulderLaunchOffset;
-	[SerializeField]
+	/*[SerializeField]
 	private int
-		explosionSize;
+		explosionSize;*/
 	private VoxelQuery explosionQuery;
 	private Dictionary<VoxelChunk, List<VoxelPosition>> queryResults;
 	new private Camera camera;
@@ -170,11 +170,11 @@ public class CatapultController : MonoBehaviour
 			return;
 		}
 
-		if (explosionSize <= 0) {
+		/*if (explosionSize <= 0) {
 			Debug.LogError ("explosionSize <= 0");
 			enabled = false;
 			return;
-		}
+		}*/
 
 		BuildExplosionQuery ();
 	}
@@ -189,8 +189,9 @@ public class CatapultController : MonoBehaviour
 
 				}
 			}
-		}*/
-		explosionQuery = new VoxelQuery (explosionSize, explosionSize, explosionSize, /*explosionMask*/EXPLOSION_QUERY_MASK, OnQueryExecute);
+		}
+		explosionQuery = new VoxelQuery (explosionSize, explosionSize, explosionSize, explosionMask, OnQueryExecute);*/
+		explosionQuery = new VoxelQuery (7, 7, 7, EXPLOSION_QUERY_MASK, OnQueryExecute);
 		explosionQuery.prepareCallback = OnQueryPrepare;
 		explosionQuery.disposeCallback = OnQueryDispose;
 	}

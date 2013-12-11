@@ -1,8 +1,22 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public class VoxelEngine : Singleton<VoxelEngine>
 {
+	[Serializable]
+	public class VoxelIdFaceMapping
+	{
+		public int voxelId;
+		public int frontFaceTileId;
+		public int topFaceTileId;
+		public int rightFaceTileId;
+		public int backFaceTileId;
+		public int bottomFaceTileId;
+		public int leftFaceTileId;
+
+	}
+
 	[SerializeField]
 	public Material
 		atlas;
@@ -36,11 +50,12 @@ public class VoxelEngine : Singleton<VoxelEngine>
 	[SerializeField]
 	private Rect[]
 		_tileUvs;
-				
-	public Rect GetTileUv (byte tile)
-	{
-		return _tileUvs [tile - 1];
-	}
+	[SerializeField]
+	private VoxelIdFaceMapping[]
+		_voxelIdsFaceMappings;
+	[SerializeField]
+	private Dictionary<byte, int[]>
+		_voxelIdFaceMappingCache;
 		
 	public int tileSize {
 		get {
@@ -95,9 +110,15 @@ public class VoxelEngine : Singleton<VoxelEngine>
 			return _halfVoxelSize; 
 		}
 	}
+
+	void Awake ()
+	{
+		BuildVoxelIdMappingCache ();
+	}
 		
 	public void SetVoxelSize (float voxelSize)
 	{
+		// cached fields
 		_voxelSize = voxelSize;
 		_halfVoxelSize = _voxelSize * 0.5f;
 		_up = Vector3.up * _voxelSize;
@@ -137,6 +158,44 @@ public class VoxelEngine : Singleton<VoxelEngine>
 			}
 			vPos -= yOffset;
 		}
+	}
+
+	public void BuildVoxelIdMappingCache ()
+	{
+		_voxelIdFaceMappingCache = new Dictionary<byte, int[]> ();
+		foreach (VoxelIdFaceMapping voxelIdFaceMapping in _voxelIdsFaceMappings) {
+			int[] faceMappings = new int[6];
+			faceMappings [0] = voxelIdFaceMapping.frontFaceTileId;
+			faceMappings [1] = voxelIdFaceMapping.topFaceTileId;
+			faceMappings [2] = voxelIdFaceMapping.rightFaceTileId;
+			faceMappings [3] = voxelIdFaceMapping.backFaceTileId;
+			faceMappings [4] = voxelIdFaceMapping.bottomFaceTileId;
+			faceMappings [5] = voxelIdFaceMapping.leftFaceTileId;
+			byte voxelId = (byte)voxelIdFaceMapping.voxelId;
+			if (_voxelIdFaceMappingCache.ContainsKey (voxelId)) {
+				throw new Exception ("duplicate face mapping for voxel id: " + voxelId);
+			}
+			_voxelIdFaceMappingCache.Add (voxelId, faceMappings);
+		}
+	}
+
+	public Rect GetTileUv (int tileId)
+	{
+		return _tileUvs [tileId - 1];
+	}
+
+	public void GetVoxelIdFaceMapping (byte voxelId, out int frontFaceTileId, out int topFaceTileId, out int rightFaceTileId, out int backFaceTileId, out int bottomFaceTileId, out int leftFaceTileId)
+	{
+		int[] faceMapping;
+		if (!_voxelIdFaceMappingCache.TryGetValue (voxelId, out faceMapping)) {
+			throw new Exception ("unmapped voxel id: " + voxelId);
+		}
+		frontFaceTileId = faceMapping [0];
+		topFaceTileId = faceMapping [1];
+		rightFaceTileId = faceMapping [2];
+		backFaceTileId = faceMapping [3];
+		bottomFaceTileId = faceMapping [4];
+		leftFaceTileId = faceMapping [5];
 	}
 
 }
