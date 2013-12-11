@@ -440,7 +440,7 @@ public class VoxelChunk : MonoBehaviour
 		// FIXME: checking invariants
 		if (data [voxelIndex] != 0) {
 			Debug.LogWarning ("data [voxelIndex] != 0");
-			//return;
+			return;
 		}
 		
 		data [voxelIndex] = voxelId;
@@ -661,7 +661,7 @@ public class VoxelChunk : MonoBehaviour
 		// FIXME: checking invariants
 		if (data [voxelIndex] == 0) {
 			Debug.LogWarning ("data [voxelIndex] == 0");
-			//return;
+			return;
 		}
 		
 		data [voxelIndex] = 0;

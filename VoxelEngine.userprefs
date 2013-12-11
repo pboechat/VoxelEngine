@@ -1,8 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\VoxelEngine\VoxelQuery.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Demos\MinecraftLikeGame\MinecraftLikePlayer.cs">
     <Files>
-      <File FileName="Assets\VoxelEngine\VoxelQuery.cs" Line="58" Column="2" />
+      <File FileName="Assets\Demos\MinecraftLikeGame\MinecraftLikePlayer.cs" Line="30" Column="47" />
+      <File FileName="Assets\VoxelEngine\VoxelEngine.cs" Line="141" Column="11" />
+      <File FileName="Assets\VoxelEngine\VoxelChunk.cs" Line="443" Column="4" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

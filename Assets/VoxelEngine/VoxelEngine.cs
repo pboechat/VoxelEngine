@@ -146,11 +146,11 @@ public class VoxelEngine : Singleton<VoxelEngine>
 				
 		Vector2 xOffset = Vector3.right * (1.0f / width);
 		Vector2 yOffset = Vector3.up * (1.0f / height);
-		Vector2 hPos = Vector2.zero;
 		Vector2 vPos = (height - 1) * yOffset;
 		_tileUvs = new Rect[width * height];
 		int i = 0;
 		for (int y = height - 1; y > 0; y--) {
+			Vector2 hPos = Vector2.zero;
 			for (int x = 0; x < width; x++) {
 				Vector2 uv = hPos + vPos;
 				_tileUvs [i++] = new Rect (uv.x, uv.y, xOffset.x, yOffset.y);
