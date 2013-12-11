@@ -29,16 +29,16 @@ public class ProceduralMeshes
 		float halfHeight = height * 0.5f;
 		float halfDepth = depth * 0.5f;
 		
-		bool hasTopFace = (excludeFaces & (int)Direction.TOP) == 0, 
-		hasBottomFace = (excludeFaces & (int)Direction.BOTTOM) == 0, 
-		hasLeftFace = (excludeFaces & (int)Direction.LEFT) == 0, 
+		bool hasFrontFace = (excludeFaces & (int)Direction.FRONT) == 0,
+		hasTopFace = (excludeFaces & (int)Direction.TOP) == 0, 
 		hasRightFace = (excludeFaces & (int)Direction.RIGHT) == 0,
-		hasFrontFace = (excludeFaces & (int)Direction.FRONT) == 0,
-		hasBackFace = (excludeFaces & (int)Direction.BACK) == 0;
+		hasBackFace = (excludeFaces & (int)Direction.BACK) == 0,
+		hasBottomFace = (excludeFaces & (int)Direction.BOTTOM) == 0, 
+		hasLeftFace = (excludeFaces & (int)Direction.LEFT) == 0; 
 		
 		int i = mesh.vertexCount;
 		
-		// back
+		// front
 		mesh.AddVertex (center + new Vector3 (-halfWidth, halfHeight, -halfDepth)); 
 		mesh.AddVertex (center + new Vector3 (halfWidth, halfHeight, -halfDepth));
 		mesh.AddVertex (center + new Vector3 (halfWidth, -halfHeight, -halfDepth));
@@ -56,7 +56,7 @@ public class ProceduralMeshes
 		mesh.AddVertex (center + new Vector3 (halfWidth, -halfHeight, halfDepth));
 		mesh.AddVertex (center + new Vector3 (halfWidth, -halfHeight, -halfDepth));
 		
-		// front
+		// back
 		mesh.AddVertex (center + new Vector3 (halfWidth, halfHeight, halfDepth));
 		mesh.AddVertex (center + new Vector3 (-halfWidth, halfHeight, halfDepth));
 		mesh.AddVertex (center + new Vector3 (-halfWidth, -halfHeight, halfDepth));
@@ -104,7 +104,7 @@ public class ProceduralMeshes
 		mesh.AddNormal (new Vector3 (-1.0f, 0.0f, 0.0f));
 		mesh.AddNormal (new Vector3 (-1.0f, 0.0f, 0.0f));
 
-		// back
+		// front
 		mesh.AddUv (new Vector2 (uvRect [0].xMin, uvRect [0].yMax));
 		mesh.AddUv (new Vector2 (uvRect [0].xMax, uvRect [0].yMax));
 		mesh.AddUv (new Vector2 (uvRect [0].xMax, uvRect [0].yMin));
@@ -122,7 +122,7 @@ public class ProceduralMeshes
 		mesh.AddUv (new Vector2 (uvRect [2].xMax, uvRect [2].yMin)); 
 		mesh.AddUv (new Vector2 (uvRect [2].xMin, uvRect [2].yMin));
 				
-		// front
+		// back
 		mesh.AddUv (new Vector2 (uvRect [3].xMin, uvRect [3].yMax));
 		mesh.AddUv (new Vector2 (uvRect [3].xMax, uvRect [3].yMax));
 		mesh.AddUv (new Vector2 (uvRect [3].xMax, uvRect [3].yMin));
@@ -140,8 +140,8 @@ public class ProceduralMeshes
 		mesh.AddUv (new Vector2 (uvRect [5].xMax, uvRect [5].yMin)); 
 		mesh.AddUv (new Vector2 (uvRect [5].xMin, uvRect [5].yMin));
 		
-		// back
-		if (hasBackFace) {
+		// front
+		if (hasFrontFace) {
 			mesh.AddIndex (i);
 			mesh.AddIndex (i + 1);
 			mesh.AddIndex (i + 2);
@@ -191,8 +191,8 @@ public class ProceduralMeshes
 			mesh.AddIndex (0);
 		}		
 		
-		// front
-		if (hasFrontFace) {
+		// back
+		if (hasBackFace) {
 			mesh.AddIndex (i + 12);
 			mesh.AddIndex (i + 13);
 			mesh.AddIndex (i + 14);

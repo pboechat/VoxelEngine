@@ -85,11 +85,15 @@ public class VoxelEngine : Singleton<VoxelEngine>
 	}
 	
 	public float voxelSize {
-		get { return _voxelSize; }
+		get { 
+			return _voxelSize;
+		}
 	}
 		
 	public float halfVoxelSize {
-		get { return _halfVoxelSize; }
+		get { 
+			return _halfVoxelSize; 
+		}
 	}
 		
 	public void SetVoxelSize (float voxelSize)

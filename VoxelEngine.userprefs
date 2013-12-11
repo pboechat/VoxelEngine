@@ -1,10 +1,16 @@
 ﻿<Properties>
+<<<<<<< HEAD
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\VoxelEngine\VoxelChunk.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Demos\CatapultGame\Boulder.cs">
     <Files>
-      <File FileName="Assets\Scripts\VoxelEngine\VoxelChunk.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\VoxelEngine\VoxelChunk.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\VoxelEngine\ProceduralMeshes.cs" Line="1" Column="1" />
+      <File FileName="Assets\Demos\CatapultGame\CatapultController.cs" Line="69" Column="3" />
+      <File FileName="Assets\Demos\CatapultGame\Boulder.cs" Line="38" Column="38" />
+=======
+  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\CatapultController.cs">
+    <Files>
+      <File FileName="Assets\Scripts\CatapultController.cs" Line="76" Column="24" />
+>>>>>>> 0acab00b6f61367cf8c693f5498255a9d6856d80
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
