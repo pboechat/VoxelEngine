@@ -34,6 +34,8 @@ public class GUIToolbox : MonoBehaviour
 	{
 		BuildButtons();
 
+		UIEventListener.Get( transform.Find( "Button_00_Delete" ).gameObject ).onClick = OnClick_Delete;
+
 		GetComponent<UIGrid>().repositionNow = true;
 	}
 	
