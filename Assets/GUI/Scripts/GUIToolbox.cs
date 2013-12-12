@@ -29,12 +29,17 @@ public class GUIToolbox : MonoBehaviour
 
 	[SerializeField]
 	private GameObject _prefab_ButtonAddVoxel;
+
+	private GameObject[] _buttons = new GameObject[VOXEL_TYPES.Length];
 	
 	private void Awake()
 	{
 		BuildButtons();
 
-		UIEventListener.Get( transform.Find( "Button_00_Delete" ).gameObject ).onClick = OnClick_Delete;
+		_buttons[0] = transform.Find( "Button_00_Delete" ).gameObject;
+		UIEventListener.Get( _buttons[0] ).onClick = OnClick_Delete;
+
+		_buttons[1].GetComponent<UIToggle>().startsActive = true;
 
 		GetComponent<UIGrid>().repositionNow = true;
 	}
@@ -51,12 +56,29 @@ public class GUIToolbox : MonoBehaviour
 
 			UIEventListener.Get( bGO ).onClick = OnClick_Add;
 			bGO.transform.Find( "Image" ).GetComponent<UISprite>().spriteName = i.ToString();
-			
-			if( i == 1 )
-				bGO.GetComponent<UIToggle>().startsActive = true;
+			_buttons[i] = bGO;
 		}
 	}
-	
+
+	private void Update()
+	{
+		float mouseScroll = Input.GetAxis( "Mouse ScrollWheel" );
+		if( mouseScroll > 0 )
+		{
+			_picker.voxelId++;
+			if( _picker.voxelId >= VOXEL_TYPES.Length )
+				_picker.voxelId = 1;
+			_buttons[_picker.voxelId].GetComponent<UIToggle>().value = true;
+		}
+		else if( mouseScroll < 0 )
+		{
+			_picker.voxelId--;
+			if( _picker.voxelId < 1 )
+				_picker.voxelId = VOXEL_TYPES.Length - 1;
+			_buttons[_picker.voxelId].GetComponent<UIToggle>().value = true;
+		}
+	}
+
 	
 	#region Button Event Handlers
 	
