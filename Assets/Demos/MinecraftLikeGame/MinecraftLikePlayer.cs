@@ -20,6 +20,9 @@ public class MinecraftLikePlayer : MonoBehaviour
 
 	private void OnClick()
 	{
+		if( UICamera.currentTouchID != pickingButton )
+			return;
+
 		Ray pickingRay = camera.ScreenPointToRay( Input.mousePosition );
 		RaycastHit hitInfo;
 		if( Physics.Raycast( pickingRay, out hitInfo, pickingDistance ) )

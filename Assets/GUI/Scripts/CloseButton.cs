@@ -9,17 +9,13 @@ public class CloseButton : MonoBehaviour
 
 	private void OnClick()
 	{
-		_dialog = DialogManager.instance.ShowMessage( "Exit Vox Regis?", "Are you sure you want to exit Vox Regis?", DialogManager.MessageDialogOptions.YesNoButtons );
+		_dialog = DialogManager.instance.ShowMessage( "Exit Voxel Engine Demo?", "Are you sure you want to exit Voxel Engine Demo?", DialogManager.MessageDialogOptions.YesNoButtons );
+		_dialog.OnDialogAccepted += OnDialogConfirmation;
 	}
 
 	private void OnDialogConfirmation()
 	{
-		DialogManager.instance.OnDialogHidden -= OnDialogConfirmation;
-
-		if( _dialog.Result == 1 )
-			Application.Quit();
-		else
-			_dialog.Destroy();
+		Application.Quit();
 	}
 
 }
