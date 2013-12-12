@@ -21,16 +21,16 @@ public class VoxelEngineInspector : Editor
 		newVoxelSize = EditorGUILayout.FloatField ("Voxel Size", newVoxelSize);
 		_target.atlas = (Material)EditorGUILayout.ObjectField ("Atlas", _target.atlas, typeof(Material), true);
 		newTileSize = EditorGUILayout.IntField ("Tile Size", newTileSize);
-		SerializedProperty voxelIdsFaceMappingsProperty = serializedObject.FindProperty ("_voxelIdsFaceMappings");
+		SerializedProperty voxelFaceMappingsProperty = serializedObject.FindProperty ("_voxelFaceMappings");
 		EditorGUI.BeginChangeCheck ();
-		EditorGUILayout.PropertyField (voxelIdsFaceMappingsProperty, true);
+		EditorGUILayout.PropertyField (voxelFaceMappingsProperty, true);
 		if (EditorGUI.EndChangeCheck ()) {
 			serializedObject.ApplyModifiedProperties ();
 		}
 		if (GUILayout.Button ("Update")) {
 			_target.SetTileSize (newTileSize);
 			_target.SetVoxelSize (newVoxelSize);
-			_target.BuildVoxelIdMappingCache ();
+			_target.BuildVoxelFaceMappingCache ();
 		}
 		
 		if (GUI.changed) {

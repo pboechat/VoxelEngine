@@ -5,11 +5,11 @@ public class VoxelChunk : MonoBehaviour
 {
 	private const float EPSILON = 0.00001f;
 	private static readonly Rect[] EMPTY_UV_RECTS = new Rect[] { new Rect (0.0f, 0.0f, 0.0f, 0.0f), 
-																	 new Rect (0.0f, 0.0f, 0.0f, 0.0f), 
-																	 new Rect (0.0f, 0.0f, 0.0f, 0.0f),
-																	 new Rect (0.0f, 0.0f, 0.0f, 0.0f),
-																	 new Rect (0.0f, 0.0f, 0.0f, 0.0f),
-																	 new Rect (0.0f, 0.0f, 0.0f, 0.0f) };
+																 new Rect (0.0f, 0.0f, 0.0f, 0.0f), 
+																 new Rect (0.0f, 0.0f, 0.0f, 0.0f),
+																 new Rect (0.0f, 0.0f, 0.0f, 0.0f),
+																 new Rect (0.0f, 0.0f, 0.0f, 0.0f),
+																 new Rect (0.0f, 0.0f, 0.0f, 0.0f) };
 	private const int EXCLUDE_ALL_FACES = (int)Direction.TOP | (int)Direction.BOTTOM | (int)Direction.LEFT | (int)Direction.RIGHT | (int)Direction.FRONT | (int)Direction.BACK;
 	public int x;
 	public int y;
@@ -19,6 +19,8 @@ public class VoxelChunk : MonoBehaviour
 	public int height;
 	public int depth;
 	public byte[] data;
+	[SerializeField]
+	private int depth_x_width;
 	[SerializeField]
 	private bool
 		built = false;
@@ -72,71 +74,60 @@ public class VoxelChunk : MonoBehaviour
 			throw new Exception ("not in batch mode");
 		}
 
-		chunkMesh.triangles = temporaryIndices;
-		chunkMesh.uv = temporaryUvs;
-		chunkMesh.RecalculateBounds ();
-		// necessary to update mesh collider in Unity 4.x
-		meshCollider.sharedMesh = null;
-		meshCollider.sharedMesh = chunkMesh;
+		FlushMeshChanges (temporaryIndices, temporaryUvs);
 
 		batchMode = false;
 	}
+	
+	void FlushMeshChanges (int[] indices, Vector2[] uvs = null)
+	{
+		chunkMesh.triangles = indices;
+		if (uvs != null) {
+			chunkMesh.uv = uvs;
+		}
+		//chunkMesh.RecalculateBounds ();
+		// necessary to update mesh collider in Unity 4.x
+		meshCollider.sharedMesh = null;
+		meshCollider.sharedMesh = chunkMesh;
+	}
+	
+	bool HasFrontNeighbor (int x, int y1, int z)
+	{
+		if (z == 0) {
+			return false;
+		}
+		
+		return data [y1 + (z - 1) * width + x] > 0;
+	}
+	
+	int GetFrontNeighborIndex (int x, int y1, int z)
+	{
+		if (z == 0) {
+			return -1;
+		}
+		
+		return y1 + (z - 1) * width + x;
+	}
 
-	bool HasTop (int x, int y, int z1)
+	bool HasTopNeighbor (int x, int y, int z1)
 	{
 		if (y == height - 1) {
 			return false;
 		}
 		
-		return data [(y + 1) * (depth * width) + z1 + x] > 0;
+		return data [(y + 1) * depth_x_width + z1 + x] > 0;
 	}
 
-	int GetTopVoxelIndex (int x, int y, int z1)
+	int GetTopNeighborIndex (int x, int y, int z1)
 	{
 		if (y == height - 1) {
 			return -1;
 		}
 		
-		return (y + 1) * (depth * width) + z1 + x;
+		return (y + 1) * depth_x_width + z1 + x;
 	}
 	
-	bool HasBottom (int x, int y, int z1)
-	{
-		if (y == 0) {
-			return false;
-		}
-		
-		return data [(y - 1) * (depth * width) + z1 + x] > 0;
-	}
-
-	int GetBottomVoxelIndex (int x, int y, int z1)
-	{
-		if (y == 0) {
-			return -1;
-		}
-		
-		return (y - 1) * (depth * width) + z1 + x;
-	}
-	
-	bool HasLeft (int x, int y1, int z1)
-	{
-		if (x == 0) {
-			return false;
-		}
-		
-		return data [y1 + z1 + x - 1] > 0;
-	}
-
-	int GetLeftVoxelIndex (int x, int y1, int z1)
-	{
-		if (x == 0) {
-			return -1;
-		}
-		
-		return y1 + z1 + x - 1;
-	}
-	
-	bool HasRight (int x, int y1, int z1)
+	bool HasRightNeighbor (int x, int y1, int z1)
 	{
 		if (x == width - 1) {
 			return false;
@@ -145,7 +136,7 @@ public class VoxelChunk : MonoBehaviour
 		return data [y1 + z1 + x + 1] > 0;
 	}
 
-	int GetRightVoxelIndex (int x, int y1, int z1)
+	int GetRightNeighborIndex (int x, int y1, int z1)
 	{
 		if (x == width - 1) {
 			return -1;
@@ -154,25 +145,7 @@ public class VoxelChunk : MonoBehaviour
 		return y1 + z1 + x + 1;
 	}
 	
-	bool HasFront (int x, int y1, int z)
-	{
-		if (z == 0) {
-			return false;
-		}
-		
-		return data [y1 + (z - 1) * width + x] > 0;
-	}
-
-	int GetFrontVoxelIndex (int x, int y1, int z)
-	{
-		if (z == 0) {
-			return -1;
-		}
-		
-		return y1 + (z - 1) * width + x;
-	}
-	
-	bool HasBack (int x, int y1, int z)
+	bool HasBackNeighbor (int x, int y1, int z)
 	{
 		if (z == depth - 1) {
 			return false;
@@ -181,7 +154,7 @@ public class VoxelChunk : MonoBehaviour
 		return data [y1 + (z + 1) * width + x] > 0;
 	}
 
-	int GetBackVoxelIndex (int x, int y1, int z)
+	int GetBackNeighborIndex (int x, int y1, int z)
 	{
 		if (z == depth - 1) {
 			return -1;
@@ -189,10 +162,46 @@ public class VoxelChunk : MonoBehaviour
 		
 		return y1 + (z + 1) * width + x;
 	}
+	
+	bool HasBottomNeighbor (int x, int y, int z1)
+	{
+		if (y == 0) {
+			return false;
+		}
+		
+		return data [(y - 1) * depth_x_width + z1 + x] > 0;
+	}
+	
+	int GetBottomNeighborIndex (int x, int y, int z1)
+	{
+		if (y == 0) {
+			return -1;
+		}
+		
+		return (y - 1) * depth_x_width + z1 + x;
+	}
+	
+	bool HasLeftNeighbor (int x, int y1, int z1)
+	{
+		if (x == 0) {
+			return false;
+		}
+		
+		return data [y1 + z1 + x - 1] > 0;
+	}
+	
+	int GetLeftNeighborIndex (int x, int y1, int z1)
+	{
+		if (x == 0) {
+			return -1;
+		}
+		
+		return y1 + z1 + x - 1;
+	}
 
 	public bool QueryVoxel (int x, int y, int z)
 	{
-		return (data [y * (depth * width) + z * width + x] != 0);
+		return (data [y * depth_x_width + z * width + x] != 0);
 	}
 
 	void FindVoxel (Vector3 point, out int x, out int y, out int z)
@@ -208,7 +217,7 @@ public class VoxelChunk : MonoBehaviour
 		//Debug.Log ("********** Finding voxel **********");
 		//Debug.Log ("1. Snapped voxel coordinates: (" + x + ", " + y + ", " + z + ")");
 
-		int voxelIndex = y * (depth * width) + z * width + x;
+		int voxelIndex = y * depth_x_width + z * width + x;
 		
 		if (data [voxelIndex] != 0) {
 			//Debug.Log ("2. Voxel found, returning");
@@ -262,7 +271,7 @@ public class VoxelChunk : MonoBehaviour
 		// DEBUG:
 		//Debug.Log ("2. Picking internal chunk voxel");
 
-		int voxelIndex = y * (depth * width) + z * width + x;
+		int voxelIndex = y * depth_x_width + z * width + x;
 
 		if (data [voxelIndex] == 0) {
 			//Debug.Log ("3. Adjacent empty voxel found, returning");
@@ -330,10 +339,7 @@ public class VoxelChunk : MonoBehaviour
 					// DEBUG:
 					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk at left [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
 					chunk.AddVoxel (voxelId, chunk.width - 1, y, z);
-				} /*else {
-					// DEBUG:
-					Debug.Log ("- Can't add voxel");
-				}*/
+				}
 			}
 			
 			return;
@@ -348,10 +354,7 @@ public class VoxelChunk : MonoBehaviour
 					// DEBUG:
 					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk at right [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
 					chunk.AddVoxel (voxelId, 0, y, z);
-				} /*else {
-					// DEBUG:
-					Debug.Log ("- Can't add voxel");
-				}*/
+				}
 			}
 			
 			return;
@@ -368,10 +371,7 @@ public class VoxelChunk : MonoBehaviour
 					// DEBUG:
 					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk in front [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
 					chunk.AddVoxel (voxelId, x, y, chunk.depth - 1);
-				} /*else {
-					// DEBUG:
-					Debug.Log ("- Can't add voxel");
-				}*/
+				}
 			}
 			
 			return;
@@ -386,10 +386,7 @@ public class VoxelChunk : MonoBehaviour
 					// DEBUG:
 					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk behind [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
 					chunk.AddVoxel (voxelId, x, y, 0);
-				} /*else {
-					// DEBUG:
-					Debug.Log ("- Can't add voxel");
-				}*/
+				}
 			}
 			
 			return;
@@ -406,10 +403,7 @@ public class VoxelChunk : MonoBehaviour
 					// DEBUG:
 					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk below [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
 					chunk.AddVoxel (voxelId, x, chunk.height - 1, z);
-				} /*else {
-					// DEBUG:
-					Debug.Log ("- Can't add voxel");
-				}*/
+				}
 			}
 			
 			return;
@@ -424,10 +418,7 @@ public class VoxelChunk : MonoBehaviour
 					// DEBUG:
 					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk above [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
 					chunk.AddVoxel (voxelId, x, 0, z);
-				} /*else {
-					// DEBUG:
-					Debug.Log ("- Can't add voxel");
-				}*/
+				}
 			}
 			
 			return;
@@ -453,12 +444,12 @@ public class VoxelChunk : MonoBehaviour
 		
 		bool hasTopNeighbor;
 		
-		int neighborVoxelIndex;
+		int neighborIndex;
 		int neighborBaseIndex;
 		
-		if ((neighborVoxelIndex = GetFrontVoxelIndex (x, y1, z)) != -1 && data [neighborVoxelIndex] != 0) {
+		if ((neighborIndex = GetFrontNeighborIndex (x, y1, z)) != -1 && data [neighborIndex] != 0) {
 			// remove back face from front neighbor
-			neighborBaseIndex = neighborVoxelIndex * 36;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex + 18] = 0;
 			indices [neighborBaseIndex + 19] = 0;
 			indices [neighborBaseIndex + 20] = 0;
@@ -475,10 +466,10 @@ public class VoxelChunk : MonoBehaviour
 			indices [baseIndex + 5] = baseVertex + 3;
 		}
 		
-		if ((neighborVoxelIndex = GetTopVoxelIndex (x, y, z1)) != -1 && data [neighborVoxelIndex] != 0) {
+		if ((neighborIndex = GetTopNeighborIndex (x, y, z1)) != -1 && data [neighborIndex] != 0) {
 			hasTopNeighbor = true;
 			// remove bottom face from top neighbor
-			neighborBaseIndex = neighborVoxelIndex * 36;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex + 24] = 0;
 			indices [neighborBaseIndex + 25] = 0;
 			indices [neighborBaseIndex + 26] = 0;
@@ -496,9 +487,9 @@ public class VoxelChunk : MonoBehaviour
 			indices [baseIndex + 11] = baseVertex + 7;
 		}
 		
-		if ((neighborVoxelIndex = GetRightVoxelIndex (x, y1, z1)) != -1 && data [neighborVoxelIndex] != 0) {
+		if ((neighborIndex = GetRightNeighborIndex (x, y1, z1)) != -1 && data [neighborIndex] != 0) {
 			// remove left face from right neighbor
-			neighborBaseIndex = neighborVoxelIndex * 36;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex + 30] = 0;
 			indices [neighborBaseIndex + 31] = 0;
 			indices [neighborBaseIndex + 32] = 0;
@@ -515,9 +506,9 @@ public class VoxelChunk : MonoBehaviour
 			indices [baseIndex + 17] = baseVertex + 11;
 		}
 		
-		if ((neighborVoxelIndex = GetBackVoxelIndex (x, y1, z)) != -1 && data [neighborVoxelIndex] != 0) {
+		if ((neighborIndex = GetBackNeighborIndex (x, y1, z)) != -1 && data [neighborIndex] != 0) {
 			// remove front face from back neighbor
-			neighborBaseIndex = neighborVoxelIndex * 36;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex] = 0;
 			indices [neighborBaseIndex + 1] = 0;
 			indices [neighborBaseIndex + 2] = 0;
@@ -534,15 +525,15 @@ public class VoxelChunk : MonoBehaviour
 			indices [baseIndex + 23] = baseVertex + 15;
 		}
 
-		if ((neighborVoxelIndex = GetBottomVoxelIndex (x, y, z1)) != -1 && data [neighborVoxelIndex] != 0) {
+		if ((neighborIndex = GetBottomNeighborIndex (x, y, z1)) != -1 && data [neighborIndex] != 0) {
 			// remove top face from bottom neighbor
-			neighborBaseIndex = neighborVoxelIndex * 36;
-			indices [neighborBaseIndex + 12] = 0;
-			indices [neighborBaseIndex + 13] = 0;
-			indices [neighborBaseIndex + 14] = 0;
-			indices [neighborBaseIndex + 15] = 0;
-			indices [neighborBaseIndex + 16] = 0;
-			indices [neighborBaseIndex + 17] = 0;
+			neighborBaseIndex = neighborIndex * 36;
+			indices [neighborBaseIndex + 6] = 0;
+			indices [neighborBaseIndex + 7] = 0;
+			indices [neighborBaseIndex + 8] = 0;
+			indices [neighborBaseIndex + 9] = 0;
+			indices [neighborBaseIndex + 10] = 0;
+			indices [neighborBaseIndex + 11] = 0;
 		} else {
 			// add bottom face to new voxel
 			indices [baseIndex + 24] = baseVertex + 16;
@@ -553,9 +544,9 @@ public class VoxelChunk : MonoBehaviour
 			indices [baseIndex + 29] = baseVertex + 18;
 		}
 		
-		if ((neighborVoxelIndex = GetLeftVoxelIndex (x, y1, z1)) != -1 && data [neighborVoxelIndex] != 0) {
+		if ((neighborIndex = GetLeftNeighborIndex (x, y1, z1)) != -1 && data [neighborIndex] != 0) {
 			// remove right face from left neighbor
-			neighborBaseIndex = neighborVoxelIndex * 36;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex + 12] = 0;
 			indices [neighborBaseIndex + 13] = 0;
 			indices [neighborBaseIndex + 14] = 0;
@@ -573,7 +564,7 @@ public class VoxelChunk : MonoBehaviour
 		}
 
 		int frontFaceTileId, topFaceTileId, rightFaceTileId, backFaceTileId, bottomFaceTileId, leftFaceTileId;
-		VoxelEngine.instance.GetVoxelIdFaceMapping (voxelId, out frontFaceTileId, out topFaceTileId, out rightFaceTileId, out backFaceTileId, out bottomFaceTileId, out leftFaceTileId);
+		VoxelEngine.instance.GetVoxelFaceMapping (voxelId, out frontFaceTileId, out topFaceTileId, out rightFaceTileId, out backFaceTileId, out bottomFaceTileId, out leftFaceTileId, hasTopNeighbor);
 
 		// front
 		Rect uvRect = VoxelEngine.instance.GetTileUv (frontFaceTileId);
@@ -598,32 +589,27 @@ public class VoxelChunk : MonoBehaviour
 		
 		// back
 		uvRect = VoxelEngine.instance.GetTileUv (backFaceTileId);
-		uvs [baseVertex + 16] = new Vector2 (uvRect.xMin, uvRect.yMin);
-		uvs [baseVertex + 17] = new Vector2 (uvRect.xMax, uvRect.yMin);
-		uvs [baseVertex + 18] = new Vector2 (uvRect.xMax, uvRect.yMax);
-		uvs [baseVertex + 19] = new Vector2 (uvRect.xMin, uvRect.yMax);
+		uvs [baseVertex + 12] = new Vector2 (uvRect.xMin, uvRect.yMin);
+		uvs [baseVertex + 13] = new Vector2 (uvRect.xMax, uvRect.yMin);
+		uvs [baseVertex + 14] = new Vector2 (uvRect.xMax, uvRect.yMax);
+		uvs [baseVertex + 15] = new Vector2 (uvRect.xMin, uvRect.yMax);
 		
 		// bottom
 		uvRect = VoxelEngine.instance.GetTileUv (bottomFaceTileId);
-		uvs [baseVertex + 20] = new Vector2 (uvRect.xMin, uvRect.yMax);
-		uvs [baseVertex + 21] = new Vector2 (uvRect.xMax, uvRect.yMax);
-		uvs [baseVertex + 22] = new Vector2 (uvRect.xMax, uvRect.yMin); 
-		uvs [baseVertex + 23] = new Vector2 (uvRect.xMin, uvRect.yMin);	
+		uvs [baseVertex + 16] = new Vector2 (uvRect.xMin, uvRect.yMax);
+		uvs [baseVertex + 17] = new Vector2 (uvRect.xMax, uvRect.yMax);
+		uvs [baseVertex + 18] = new Vector2 (uvRect.xMax, uvRect.yMin); 
+		uvs [baseVertex + 19] = new Vector2 (uvRect.xMin, uvRect.yMin);	
 		
 		// left
 		uvRect = VoxelEngine.instance.GetTileUv (leftFaceTileId);
-		uvs [baseVertex + 12] = new Vector2 (uvRect.xMin, uvRect.yMax);
-		uvs [baseVertex + 13] = new Vector2 (uvRect.xMax, uvRect.yMax);
-		uvs [baseVertex + 14] = new Vector2 (uvRect.xMax, uvRect.yMin);
-		uvs [baseVertex + 15] = new Vector2 (uvRect.xMin, uvRect.yMin);
+		uvs [baseVertex + 20] = new Vector2 (uvRect.xMin, uvRect.yMax);
+		uvs [baseVertex + 21] = new Vector2 (uvRect.xMax, uvRect.yMax);
+		uvs [baseVertex + 22] = new Vector2 (uvRect.xMax, uvRect.yMin);
+		uvs [baseVertex + 23] = new Vector2 (uvRect.xMin, uvRect.yMin);
 
 		if (!batchMode) {
-			chunkMesh.triangles = indices;
-			chunkMesh.uv = uvs;
-			chunkMesh.RecalculateBounds ();
-			// necessary to update mesh collider in Unity 4.x
-			meshCollider.sharedMesh = null;
-			meshCollider.sharedMesh = chunkMesh;
+			FlushMeshChanges (indices, uvs);
 		}
 	}
 
@@ -718,14 +704,14 @@ public class VoxelChunk : MonoBehaviour
 		indices [baseIndex + 34] = 0;
 		indices [baseIndex + 35] = 0;
 
-		int neighborVoxelIndex;
+		int neighborIndex;
 		int neighborBaseVertex;
 		int neighborBaseIndex;
 		
 		// add front face to back neighbor
-		if ((neighborVoxelIndex = GetBackVoxelIndex (x, y1, z)) != -1 && data [neighborVoxelIndex] != 0) {
-			neighborBaseVertex = neighborVoxelIndex * 24;
-			neighborBaseIndex = neighborVoxelIndex * 36;
+		if ((neighborIndex = GetBackNeighborIndex (x, y1, z)) != -1 && data [neighborIndex] != 0) {
+			neighborBaseVertex = neighborIndex * 24;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex] = neighborBaseVertex;
 			indices [neighborBaseIndex + 1] = neighborBaseVertex + 1;
 			indices [neighborBaseIndex + 2] = neighborBaseVertex + 2;
@@ -735,9 +721,9 @@ public class VoxelChunk : MonoBehaviour
 		}
 		
 		// add top face to bottom neighbor
-		if ((neighborVoxelIndex = GetBottomVoxelIndex (x, y, z1)) != -1 && data [neighborVoxelIndex] != 0) {
-			neighborBaseVertex = neighborVoxelIndex * 24;
-			neighborBaseIndex = neighborVoxelIndex * 36;
+		if ((neighborIndex = GetBottomNeighborIndex (x, y, z1)) != -1 && data [neighborIndex] != 0) {
+			neighborBaseVertex = neighborIndex * 24;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex + 6] = neighborBaseVertex + 4;
 			indices [neighborBaseIndex + 7] = neighborBaseVertex + 5;
 			indices [neighborBaseIndex + 8] = neighborBaseVertex + 6;
@@ -747,9 +733,9 @@ public class VoxelChunk : MonoBehaviour
 		}
 		
 		// add right face to left neighbor
-		if ((neighborVoxelIndex = GetLeftVoxelIndex (x, y1, z1)) != -1 && data [neighborVoxelIndex] != 0) {
-			neighborBaseVertex = neighborVoxelIndex * 24;
-			neighborBaseIndex = neighborVoxelIndex * 36;
+		if ((neighborIndex = GetLeftNeighborIndex (x, y1, z1)) != -1 && data [neighborIndex] != 0) {
+			neighborBaseVertex = neighborIndex * 24;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex + 12] = neighborBaseVertex + 8;
 			indices [neighborBaseIndex + 13] = neighborBaseVertex + 9;
 			indices [neighborBaseIndex + 14] = neighborBaseVertex + 10;
@@ -759,9 +745,9 @@ public class VoxelChunk : MonoBehaviour
 		}
 		
 		// add back face to front neighbor
-		if ((neighborVoxelIndex = GetFrontVoxelIndex (x, y1, z)) != -1 && data [neighborVoxelIndex] != 0) {
-			neighborBaseVertex = neighborVoxelIndex * 24;
-			neighborBaseIndex = neighborVoxelIndex * 36;
+		if ((neighborIndex = GetFrontNeighborIndex (x, y1, z)) != -1 && data [neighborIndex] != 0) {
+			neighborBaseVertex = neighborIndex * 24;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex + 18] = neighborBaseVertex + 12;
 			indices [neighborBaseIndex + 19] = neighborBaseVertex + 13;
 			indices [neighborBaseIndex + 20] = neighborBaseVertex + 14;
@@ -771,9 +757,9 @@ public class VoxelChunk : MonoBehaviour
 		}		
 		
 		// add bottom face to top neighbor
-		if ((neighborVoxelIndex = GetTopVoxelIndex (x, y, z1)) != -1 && data [neighborVoxelIndex] != 0) {
-			neighborBaseVertex = neighborVoxelIndex * 24;
-			neighborBaseIndex = neighborVoxelIndex * 36;
+		if ((neighborIndex = GetTopNeighborIndex (x, y, z1)) != -1 && data [neighborIndex] != 0) {
+			neighborBaseVertex = neighborIndex * 24;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex + 24] = neighborBaseVertex + 16;
 			indices [neighborBaseIndex + 25] = neighborBaseVertex + 18;
 			indices [neighborBaseIndex + 26] = neighborBaseVertex + 17;
@@ -783,9 +769,9 @@ public class VoxelChunk : MonoBehaviour
 		}
 
 		// add left face to right neighbor
-		if ((neighborVoxelIndex = GetRightVoxelIndex (x, y1, z1)) != -1 && data [neighborVoxelIndex] != 0) {
-			neighborBaseVertex = neighborVoxelIndex * 24;
-			neighborBaseIndex = neighborVoxelIndex * 36;
+		if ((neighborIndex = GetRightNeighborIndex (x, y1, z1)) != -1 && data [neighborIndex] != 0) {
+			neighborBaseVertex = neighborIndex * 24;
+			neighborBaseIndex = neighborIndex * 36;
 			indices [neighborBaseIndex + 30] = neighborBaseVertex + 20;
 			indices [neighborBaseIndex + 31] = neighborBaseVertex + 22;
 			indices [neighborBaseIndex + 32] = neighborBaseVertex + 21;
@@ -795,11 +781,7 @@ public class VoxelChunk : MonoBehaviour
 		}
 
 		if (!batchMode) {
-			chunkMesh.triangles = indices;
-			chunkMesh.RecalculateBounds ();
-			// necessary to update mesh collider in Unity 4.x
-			meshCollider.sharedMesh = null;
-			meshCollider.sharedMesh = chunkMesh;
+			FlushMeshChanges (indices);
 		}
 	}
 	
@@ -818,6 +800,8 @@ public class VoxelChunk : MonoBehaviour
 			return;
 		}
 		
+		depth_x_width = depth * width;
+		
 		float halfWidth = width * 0.5f;
 		float halfHeight = height * 0.5f;
 		float halfDepth = depth * 0.5f;
@@ -830,7 +814,6 @@ public class VoxelChunk : MonoBehaviour
 		float xOffset = -halfWidth * VoxelEngine.instance.voxelSize + VoxelEngine.instance.halfVoxelSize;
 		Vector3 yStart = new Vector3 (0.0f, yOffset, 0.0f);
 		Rect[] uvRects = new Rect[6];
-		int depth_x_width = depth * width;
 		for (int y = 0; y < height; y++) {
 			int y1 = y * depth_x_width;
 			Vector3 zStart = new Vector3 (0.0f, 0.0f, zOffset);
@@ -843,33 +826,33 @@ public class VoxelChunk : MonoBehaviour
 					if (voxelId > 0) {
 						int excludeFaces = 0;
 						
-						if (HasFront (x, y1, z)) {
+						if (HasFrontNeighbor (x, y1, z)) {
 							excludeFaces |= (int)Direction.FRONT;
 						}						
 						
-						bool hasTop;
-						if ((hasTop = HasTop (x, y, z1))) {
+						bool hasTopNeighbor;
+						if ((hasTopNeighbor = HasTopNeighbor (x, y, z1))) {
 							excludeFaces |= (int)Direction.TOP;
 						}
 						
-						if (HasRight (x, y1, z1)) {
+						if (HasRightNeighbor (x, y1, z1)) {
 							excludeFaces |= (int)Direction.RIGHT;
 						}						
 						
-						if (HasBottom (x, y, z1)) {
+						if (HasBottomNeighbor (x, y, z1)) {
 							excludeFaces |= (int)Direction.BOTTOM;
 						}
 						
-						if (HasBack (x, y1, z)) {
+						if (HasBackNeighbor (x, y1, z)) {
 							excludeFaces |= (int)Direction.BACK;
 						}
 						
-						if (HasLeft (x, y1, z1)) {
+						if (HasLeftNeighbor (x, y1, z1)) {
 							excludeFaces |= (int)Direction.LEFT;
 						}
 
 						int frontFaceTileId, topFaceTileId, rightFaceTileId, backFaceTileId, bottomFaceTileId, leftFaceTileId;
-						VoxelEngine.instance.GetVoxelIdFaceMapping (voxelId, out frontFaceTileId, out topFaceTileId, out rightFaceTileId, out backFaceTileId, out bottomFaceTileId, out leftFaceTileId);
+						VoxelEngine.instance.GetVoxelFaceMapping (voxelId, out frontFaceTileId, out topFaceTileId, out rightFaceTileId, out backFaceTileId, out bottomFaceTileId, out leftFaceTileId, hasTopNeighbor);
 
 						// front
 						uvRects [0] = VoxelEngine.instance.GetTileUv (frontFaceTileId);

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class VoxelEngine : Singleton<VoxelEngine>
 {
 	[Serializable]
-	public class VoxelIdFaceMapping
+	public class VoxelFaceMapping
 	{
 		public int voxelId;
 		public int frontFaceTileId;
@@ -14,6 +14,10 @@ public class VoxelEngine : Singleton<VoxelEngine>
 		public int backFaceTileId;
 		public int bottomFaceTileId;
 		public int leftFaceTileId;
+		public int frontFaceTileIdWithoutTopNeighbor;
+		public int rightFaceTileIdWithoutTopNeighbor;
+		public int backFaceTileIdWithoutTopNeighbor;
+		public int leftFaceTileIdWithoutTopNeighbor;
 
 	}
 
@@ -49,13 +53,12 @@ public class VoxelEngine : Singleton<VoxelEngine>
 		_forward;
 	[SerializeField]
 	private Rect[]
-		_tileUvs;
+		_tileUvsCache;
 	[SerializeField]
-	private VoxelIdFaceMapping[]
-		_voxelIdsFaceMappings;
-	[SerializeField]
+	private VoxelFaceMapping[]
+		_voxelFaceMappings;
 	private Dictionary<byte, int[]>
-		_voxelIdFaceMappingCache;
+		_voxelFaceMappingCache;
 		
 	public int tileSize {
 		get {
@@ -111,11 +114,6 @@ public class VoxelEngine : Singleton<VoxelEngine>
 		}
 	}
 
-	void Awake ()
-	{
-		BuildVoxelIdMappingCache ();
-	}
-		
 	public void SetVoxelSize (float voxelSize)
 	{
 		// cached fields
@@ -128,74 +126,86 @@ public class VoxelEngine : Singleton<VoxelEngine>
 		_back = Vector3.back * _voxelSize;
 		_forward = Vector3.forward * _voxelSize;
 	}
+
+	void BuildTileUvsCache ()
+	{
+		Texture2D atlasTexture = (Texture2D)atlas.mainTexture;
+		int width = atlasTexture.width / _tileSize;
+		int height = atlasTexture.height / _tileSize;
+		Vector2 xOffset = Vector3.right * (1.0f / width);
+		Vector2 yOffset = Vector3.up * (1.0f / height);
+		_tileUvsCache = new Rect[width * height];
+		int i = 0;
+		Vector2 yStart = (height - 1) * yOffset;
+		for (int y = height - 1; y >= 0; y--) {
+			Vector2 xStart = Vector2.zero;
+			for (int x = 0; x < width; x++) {
+				Vector2 uv = xStart + yStart;
+				_tileUvsCache [i++] = new Rect (uv.x, uv.y, xOffset.x, yOffset.y);
+				xStart += xOffset;
+			}
+			yStart -= yOffset;
+		}
+	}
 		
 	public void SetTileSize (int tileSize)
 	{
 		_tileSize = tileSize;
-				
+		
 		Texture2D atlasTexture = (Texture2D)atlas.mainTexture;
-				
-		if (atlasTexture.width % tileSize != 0 || atlasTexture.height % tileSize != 0) {
+		if (atlasTexture.width % _tileSize != 0 || atlasTexture.height % _tileSize != 0) {
 			Debug.LogError ("atlas dimensions must be multiple of tile size");
 			enabled = false;
 			return;
 		}
 				
-		int width = atlasTexture.width / tileSize;
-		int height = atlasTexture.height / tileSize;
-				
-		Vector2 xOffset = Vector3.right * (1.0f / width);
-		Vector2 yOffset = Vector3.up * (1.0f / height);
-		Vector2 vPos = (height - 1) * yOffset;
-		_tileUvs = new Rect[width * height];
-		int i = 0;
-		for (int y = height - 1; y > 0; y--) {
-			Vector2 hPos = Vector2.zero;
-			for (int x = 0; x < width; x++) {
-				Vector2 uv = hPos + vPos;
-				_tileUvs [i++] = new Rect (uv.x, uv.y, xOffset.x, yOffset.y);
-				hPos += xOffset;	
-			}
-			vPos -= yOffset;
-		}
+		BuildTileUvsCache ();
 	}
 
-	public void BuildVoxelIdMappingCache ()
+	public void BuildVoxelFaceMappingCache ()
 	{
-		_voxelIdFaceMappingCache = new Dictionary<byte, int[]> ();
-		foreach (VoxelIdFaceMapping voxelIdFaceMapping in _voxelIdsFaceMappings) {
-			int[] faceMappings = new int[6];
-			faceMappings [0] = voxelIdFaceMapping.frontFaceTileId;
-			faceMappings [1] = voxelIdFaceMapping.topFaceTileId;
-			faceMappings [2] = voxelIdFaceMapping.rightFaceTileId;
-			faceMappings [3] = voxelIdFaceMapping.backFaceTileId;
-			faceMappings [4] = voxelIdFaceMapping.bottomFaceTileId;
-			faceMappings [5] = voxelIdFaceMapping.leftFaceTileId;
-			byte voxelId = (byte)voxelIdFaceMapping.voxelId;
-			if (_voxelIdFaceMappingCache.ContainsKey (voxelId)) {
+		_voxelFaceMappingCache = new Dictionary<byte, int[]> ();
+		foreach (VoxelFaceMapping voxelFaceMapping in _voxelFaceMappings) {
+			int[] faceMapping = new int[10];
+			faceMapping [0] = voxelFaceMapping.frontFaceTileId;
+			faceMapping [1] = voxelFaceMapping.topFaceTileId;
+			faceMapping [2] = voxelFaceMapping.rightFaceTileId;
+			faceMapping [3] = voxelFaceMapping.backFaceTileId;
+			faceMapping [4] = voxelFaceMapping.bottomFaceTileId;
+			faceMapping [5] = voxelFaceMapping.leftFaceTileId;
+			faceMapping [6] = voxelFaceMapping.frontFaceTileIdWithoutTopNeighbor;
+			faceMapping [7] = voxelFaceMapping.rightFaceTileIdWithoutTopNeighbor;
+			faceMapping [8] = voxelFaceMapping.backFaceTileIdWithoutTopNeighbor;
+			faceMapping [9] = voxelFaceMapping.leftFaceTileIdWithoutTopNeighbor;
+			byte voxelId = (byte)voxelFaceMapping.voxelId;
+			if (_voxelFaceMappingCache.ContainsKey (voxelId)) {
 				throw new Exception ("duplicate face mapping for voxel id: " + voxelId);
 			}
-			_voxelIdFaceMappingCache.Add (voxelId, faceMappings);
+			_voxelFaceMappingCache.Add (voxelId, faceMapping);
 		}
 	}
 
 	public Rect GetTileUv (int tileId)
 	{
-		return _tileUvs [tileId - 1];
+		return _tileUvsCache [tileId - 1];
 	}
 
-	public void GetVoxelIdFaceMapping (byte voxelId, out int frontFaceTileId, out int topFaceTileId, out int rightFaceTileId, out int backFaceTileId, out int bottomFaceTileId, out int leftFaceTileId)
+	public void GetVoxelFaceMapping (byte voxelId, out int frontFaceTileId, out int topFaceTileId, out int rightFaceTileId, out int backFaceTileId, out int bottomFaceTileId, out int leftFaceTileId, bool hasTopNeighbor)
 	{
+		if (_voxelFaceMappingCache == null) {
+			BuildVoxelFaceMappingCache ();
+		}
+	
 		int[] faceMapping;
-		if (!_voxelIdFaceMappingCache.TryGetValue (voxelId, out faceMapping)) {
+		if (!_voxelFaceMappingCache.TryGetValue (voxelId, out faceMapping)) {
 			throw new Exception ("unmapped voxel id: " + voxelId);
 		}
-		frontFaceTileId = faceMapping [0];
+		frontFaceTileId = (hasTopNeighbor) ? faceMapping [0] : faceMapping [6];
 		topFaceTileId = faceMapping [1];
-		rightFaceTileId = faceMapping [2];
-		backFaceTileId = faceMapping [3];
+		rightFaceTileId = (hasTopNeighbor) ? faceMapping [2] : faceMapping [7];
+		backFaceTileId = (hasTopNeighbor) ? faceMapping [3] : faceMapping [8];
 		bottomFaceTileId = faceMapping [4];
-		leftFaceTileId = faceMapping [5];
+		leftFaceTileId = (hasTopNeighbor) ? faceMapping [5] : faceMapping [9];
 	}
 
 }

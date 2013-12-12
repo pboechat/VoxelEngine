@@ -2,6 +2,25 @@ using UnityEngine;
 
 public class MinecraftLikePlayer : MonoBehaviour
 {
+	private static readonly string[] VOXEL_TYPES = new string[] {
+		"Grass",
+		"Stone",
+		"Gravel",
+		"Sand",
+		"Snow",
+		"Wood",
+		"Wooden Plank",
+		"Coal",
+		"Iron",
+		"Gold",
+		"Diamond",
+		"Cobblestone",
+		"Stone Brick",
+		"Brick",
+		"Glass",
+		"Furnace",
+		"Toolbox"
+	};
 	[SerializeField]
 	public int
 		pickingButton;
@@ -18,19 +37,26 @@ public class MinecraftLikePlayer : MonoBehaviour
 	public int
 		voxelId;
 	private string voxelIdStr;
+	private string voxelTypesLabel;
 
 	void Awake ()
 	{
 		voxelIdStr = voxelId + "";
+		
+		voxelTypesLabel = "Voxel Types\n\n";
+		int c = 1;
+		foreach (string voxelType in VOXEL_TYPES) {
+			voxelTypesLabel += "-" + voxelType + "=" + (c++) + "\n";
+		}
 	}
 
 	void OnGUI ()
 	{
-		GUILayout.Window(0, new Rect(10, 10, 100, 100), OnDrawControlsWindow, "Controls");
-		GUILayout.Window(1, new Rect(10, 120, 120, 200), OnDrawHintsWindow, "Hints");
+		GUILayout.Window (0, new Rect (10, 10, 100, 100), OnDrawControlsWindow, "Controls");
+		GUILayout.Window (1, new Rect (10, 120, 120, 200), OnDrawHintsWindow, "Hints");
 	}
 
-	void OnDrawControlsWindow(int windowId)
+	void OnDrawControlsWindow (int windowId)
 	{
 		addMode = GUILayout.Toggle (addMode, "Add Mode");
 		GUILayout.BeginHorizontal ();
@@ -38,15 +64,15 @@ public class MinecraftLikePlayer : MonoBehaviour
 		voxelIdStr = GUILayout.TextField (voxelIdStr);
 		GUILayout.EndHorizontal ();
 		if (GUILayout.Button ("Select")) {
-			if (!int.TryParse (voxelIdStr, out voxelId) || voxelId < 1 || voxelId > 13) {
+			if (!int.TryParse (voxelIdStr, out voxelId) || voxelId < 1 || voxelId > VOXEL_TYPES.Length) {
 				voxelId = 1;
 			}
 		}
 	}
 
-	void OnDrawHintsWindow(int windowId)
+	void OnDrawHintsWindow (int windowId)
 	{
-		GUILayout.Label("Voxel Id List:\n\n-Grass=1\n-Stone=2\n-Wood=3\n-Sand=4\n-Snow=5\n-Coal=6\n-Iron=7\n-Gold=8\n-Diamond=9\n-Cobblestone=10\n-Brick=11\n-Wooden Plank=12\n-Lava=13");
+		GUILayout.Label (voxelTypesLabel);
 	}
 
 	void Update ()

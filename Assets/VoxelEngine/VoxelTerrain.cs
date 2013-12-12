@@ -84,8 +84,6 @@ public class VoxelTerrain : MonoBehaviour
 		float queryXOffset = (-query.width * 0.5f) * VoxelEngine.instance.voxelSize;
 
 		float chunkSide = VoxelEngine.instance.voxelSize * 12;
-		float halfChunkSize = chunkSide * 0.5f;
-		Vector3 chunkOffset = new Vector3 (halfChunkSize, halfChunkSize, halfChunkSize);
 		Vector3 gridOffset = new Vector3 (width * 0.5f, 0.0f, depth * 0.5f);
 
 		// find chunk and voxel starting bounds

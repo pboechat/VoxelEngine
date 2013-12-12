@@ -6,7 +6,6 @@ using System;
 public class VoxelTerrainInspector : Editor
 {
 	private VoxelTerrain _target;
-	private static bool staticGeneration;
 	private static bool buildNavMesh;
 	
 	void OnEnable ()
@@ -28,7 +27,7 @@ public class VoxelTerrainInspector : Editor
 		_target.seed = EditorGUILayout.IntField ("Seed", _target.seed);
 		EditorGUILayout.EndToggleGroup ();
 		_target.resizeDirection = (VoxelTerrain.ResizeDirection)EditorGUILayout.EnumPopup ("Resize Direction", _target.resizeDirection);
-		staticGeneration = EditorGUILayout.BeginToggleGroup ("Static Generation", staticGeneration);
+		bool staticGeneration = EditorGUILayout.BeginToggleGroup ("Static Generation", !_target.buildOnStart);
 		_target.buildOnStart = !staticGeneration;
 		buildNavMesh = EditorGUILayout.Toggle ("Build NavMesh", buildNavMesh);
 		EditorGUILayout.EndToggleGroup ();
