@@ -57,10 +57,10 @@ public class VoxelTerrain : MonoBehaviour
 		}
 	}
 	
-	void FillColumns (byte[] data, int x, int z, int height)
+	void FillColumns (Voxel[] data, byte voxelId, int x, int z, int height)
 	{
 		for (int y = 0; y < 12; y++) {
-			data [y * 144 + z * 12 + x] = (y < height) ? (byte)1 : (byte)0;
+			data [y * 144 + z * 12 + x].id = (y < height) ? voxelId : (byte)0;
 		}
 	}
 		
@@ -207,7 +207,7 @@ public class VoxelTerrain : MonoBehaviour
 		}
 	}
 		
-	VoxelChunk BuildChunk (int x, int y, int z, Vector3 position, byte[] data, bool isStatic = false)
+	VoxelChunk BuildChunk (int x, int y, int z, Vector3 position, Voxel[] data, bool isStatic = false)
 	{
 		GameObject gameObject = new GameObject ("Chunk (" + x + ", " + y + ", " + z + ")");
 		gameObject.isStatic = isStatic;
@@ -288,7 +288,7 @@ public class VoxelTerrain : MonoBehaviour
 			for (int chunkX = 0; chunkX < gridWidth; chunkX++) {
 				int chunkWidth = chunkX * 12;
 				for (int chunkY = 0, chunkHeight = 0; chunkY < gridHeight; chunkY++, chunkHeight += 12) {
-					byte[] data = new byte[1728];
+					Voxel[] data = new Voxel[1728]; // 20736 bytes
 					bool filled = false;
 					for (int z = 0; z < 12; z++) {
 						int currentZ = chunkDepth + z;
@@ -296,7 +296,7 @@ public class VoxelTerrain : MonoBehaviour
 							int currentX = chunkWidth + x;
 							
 							if (currentZ >= depth || currentX >= width) {
-								FillColumns (data, x, z, 0);
+								FillColumns (data, (byte)1, x, z, 0);
 								continue;
 							}
 							
@@ -305,7 +305,7 @@ public class VoxelTerrain : MonoBehaviour
 							if (fillHeight > 0 && !filled) {
 								filled = true;
 							}
-							FillColumns (data, x, z, fillHeight);
+							FillColumns (data, (byte)1, x, z, fillHeight);
 						}
 					}
 					
@@ -362,7 +362,7 @@ public class VoxelTerrain : MonoBehaviour
 		int i = yGrid * gridWidth * gridDepth + zGrid * gridWidth + xGrid2;
 		VoxelChunk chunk = grid [i];
 		if (chunk == null) {
-			byte[] data = new byte[1728];
+			Voxel[] data = new Voxel[1728]; // 20736 bytes
 			Array.Clear (data, 0, 1728);
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
@@ -387,7 +387,7 @@ public class VoxelTerrain : MonoBehaviour
 		int i = yGrid * gridWidth * gridDepth + zGrid * gridWidth + xGrid2;
 		VoxelChunk chunk = grid [i];
 		if (chunk == null) {
-			byte[] data = new byte[1728];
+			Voxel[] data = new Voxel[1728];
 			Array.Clear (data, 0, 1728);
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
@@ -417,7 +417,7 @@ public class VoxelTerrain : MonoBehaviour
 		int i = yGrid * gridWidth * gridDepth + zGrid2 * gridWidth + xGrid;
 		VoxelChunk chunk = grid [i];
 		if (chunk == null) {
-			byte[] data = new byte[1728];
+			Voxel[] data = new Voxel[1728];
 			Array.Clear (data, 0, 1728);
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
@@ -441,7 +441,7 @@ public class VoxelTerrain : MonoBehaviour
 		int i = yGrid * gridWidth * gridDepth + zGrid2 * gridWidth + xGrid;
 		VoxelChunk chunk = grid [i];
 		if (chunk == null) {
-			byte[] data = new byte[1728];
+			Voxel[] data = new Voxel[1728];
 			Array.Clear (data, 0, 1728);
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
@@ -471,7 +471,7 @@ public class VoxelTerrain : MonoBehaviour
 		int i = yGrid2 * gridWidth * gridDepth + zGrid * gridWidth + xGrid;
 		VoxelChunk chunk = grid [i];
 		if (chunk == null) {
-			byte[] data = new byte[1728];
+			Voxel[] data = new Voxel[1728];
 			Array.Clear (data, 0, 1728);
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
@@ -496,7 +496,7 @@ public class VoxelTerrain : MonoBehaviour
 		int i = yGrid2 * gridWidth * gridDepth + zGrid * gridWidth + xGrid;
 		VoxelChunk chunk = grid [i];
 		if (chunk == null) {
-			byte[] data = new byte[1728];
+			Voxel[] data = new Voxel[1728];
 			Array.Clear (data, 0, 1728);
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
