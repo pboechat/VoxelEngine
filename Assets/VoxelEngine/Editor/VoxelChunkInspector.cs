@@ -8,29 +8,29 @@ public class VoxelChunkInspector : Editor
 		VoxelChunk _target;
 		string newDataString;
     
-		static byte[] GetDataFromString (int width, int height, int depth, string dataString)
+		static Voxel[] GetDataFromString (int width, int height, int depth, string dataString)
 		{
 				string[] layers = dataString.Split ('-');
 				int size = height * depth * width;
-				byte[] data = new byte[size];
+				Voxel[] data = new Voxel[size];
 				int c = 0;
 				foreach (string layer in layers) {
 						string[] lines = layer.Split ('\n');
 						foreach (string line in lines) {
 								string row = line.Trim ();
 								for (int i = 0; i < row.Length; i++) {
-										byte b;
+										Voxel v = new Voxel();
 										int j;
 										if (int.TryParse (row [i] + "", out j)) {
-												b = (byte)j;
+												v.id = (byte)j;
 										} else {
-												b = 0;
+												v.id = 0;
 										}
 										// cut in the middle of processing
 										if (c == size) {
 												return data;
 										}
-										data [c++] = b;
+										data [c++] = v;
 								}
 						}
 				}
@@ -42,13 +42,13 @@ public class VoxelChunkInspector : Editor
 				return data;
 		}
 		
-		static string GetStringFromData (int width, int height, int depth, byte[] data)
+		static string GetStringFromData (int width, int height, int depth, Voxel[] data)
 		{
 				string dataString = "";
 				for (int y = 0; y < height; y++) {
 						for (int z = 0; z < depth; z++) {
 								for (int x = 0; x < width; x++) {
-										dataString += data [y * (depth * width) + z * width + x];
+										dataString += data [y * (depth * width) + z * width + x].id;
 								}
 								dataString += "\n";
 						}
