@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,12 +29,12 @@ public class ProceduralMeshes
 		float halfHeight = height * 0.5f;
 		float halfDepth = depth * 0.5f;
 		
-		bool hasFrontFace = (excludeFaces & (int)Direction.FRONT) == 0,
-		hasTopFace = (excludeFaces & (int)Direction.TOP) == 0, 
-		hasRightFace = (excludeFaces & (int)Direction.RIGHT) == 0,
-		hasBackFace = (excludeFaces & (int)Direction.BACK) == 0,
-		hasBottomFace = (excludeFaces & (int)Direction.BOTTOM) == 0, 
-		hasLeftFace = (excludeFaces & (int)Direction.LEFT) == 0; 
+		bool hasFrontFace = (excludeFaces & (int)FaceDirection.FRONT) == 0,
+		hasTopFace = (excludeFaces & (int)FaceDirection.TOP) == 0, 
+		hasRightFace = (excludeFaces & (int)FaceDirection.RIGHT) == 0,
+		hasBackFace = (excludeFaces & (int)FaceDirection.BACK) == 0,
+		hasBottomFace = (excludeFaces & (int)FaceDirection.BOTTOM) == 0, 
+		hasLeftFace = (excludeFaces & (int)FaceDirection.LEFT) == 0; 
 		
 		int i = mesh.vertexCount;
 		

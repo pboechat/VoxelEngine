@@ -11,7 +11,7 @@ public class VoxelChunk : MonoBehaviour
 																 new Rect (0.0f, 0.0f, 0.0f, 0.0f),
 																 new Rect (0.0f, 0.0f, 0.0f, 0.0f),
 																 new Rect (0.0f, 0.0f, 0.0f, 0.0f) };
-	private const int EXCLUDE_ALL_FACES = (int)Direction.TOP | (int)Direction.BOTTOM | (int)Direction.LEFT | (int)Direction.RIGHT | (int)Direction.FRONT | (int)Direction.BACK;
+	private const int EXCLUDE_ALL_FACES = (int)FaceDirection.TOP | (int)FaceDirection.BOTTOM | (int)FaceDirection.LEFT | (int)FaceDirection.RIGHT | (int)FaceDirection.FRONT | (int)FaceDirection.BACK;
 	public int x;
 	public int y;
 	public int z;
@@ -843,28 +843,28 @@ public class VoxelChunk : MonoBehaviour
 						int excludeFaces = 0;
 						
 						if (HasFrontNeighbor (x, y1, z)) {
-							excludeFaces |= (int)Direction.FRONT;
+							excludeFaces |= (int)FaceDirection.FRONT;
 						}						
 						
 						bool hasTopNeighbor;
 						if ((hasTopNeighbor = HasTopNeighbor (x, y, z1))) {
-							excludeFaces |= (int)Direction.TOP;
+							excludeFaces |= (int)FaceDirection.TOP;
 						}
 						
 						if (HasRightNeighbor (x, y1, z1)) {
-							excludeFaces |= (int)Direction.RIGHT;
+							excludeFaces |= (int)FaceDirection.RIGHT;
 						}						
 						
 						if (HasBottomNeighbor (x, y, z1)) {
-							excludeFaces |= (int)Direction.BOTTOM;
+							excludeFaces |= (int)FaceDirection.BOTTOM;
 						}
 						
 						if (HasBackNeighbor (x, y1, z)) {
-							excludeFaces |= (int)Direction.BACK;
+							excludeFaces |= (int)FaceDirection.BACK;
 						}
 						
 						if (HasLeftNeighbor (x, y1, z1)) {
-							excludeFaces |= (int)Direction.LEFT;
+							excludeFaces |= (int)FaceDirection.LEFT;
 						}
 
 						int frontFaceTileId, topFaceTileId, rightFaceTileId, backFaceTileId, bottomFaceTileId, leftFaceTileId;
