@@ -3,6 +3,7 @@ using System;
 
 public class VoxelChunk : MonoBehaviour
 {
+	private const bool DEBUG = false;
 	private const float EPSILON = 0.00001f;
 	private static readonly Rect[] EMPTY_UV_RECTS = new Rect[] { new Rect (0.0f, 0.0f, 0.0f, 0.0f), 
 																 new Rect (0.0f, 0.0f, 0.0f, 0.0f), 
@@ -20,7 +21,8 @@ public class VoxelChunk : MonoBehaviour
 	public int depth;
 	public byte[] data;
 	[SerializeField]
-	private int depth_x_width;
+	private int
+		depth_x_width;
 	[SerializeField]
 	private bool
 		built = false;
@@ -85,7 +87,6 @@ public class VoxelChunk : MonoBehaviour
 		if (uvs != null) {
 			chunkMesh.uv = uvs;
 		}
-		//chunkMesh.RecalculateBounds ();
 		// necessary to update mesh collider in Unity 4.x
 		meshCollider.sharedMesh = null;
 		meshCollider.sharedMesh = chunkMesh;
@@ -213,14 +214,17 @@ public class VoxelChunk : MonoBehaviour
 		y = Mathf.FloorToInt (voxelCoordinates.y);
 		z = Mathf.FloorToInt (voxelCoordinates.z);
 
-		// DEBUG:
-		//Debug.Log ("********** Finding voxel **********");
-		//Debug.Log ("1. Snapped voxel coordinates: (" + x + ", " + y + ", " + z + ")");
+		if (DEBUG) {
+			Debug.Log ("********** Finding voxel **********");
+			Debug.Log ("1. Snapped voxel coordinates: (" + x + ", " + y + ", " + z + ")");
+		}
 
 		int voxelIndex = y * depth_x_width + z * width + x;
 		
 		if (data [voxelIndex] != 0) {
-			//Debug.Log ("2. Voxel found, returning");
+			if (DEBUG) {
+				Debug.Log ("2. Voxel found, returning");
+			}
 			return;
 		}
 		
@@ -228,25 +232,30 @@ public class VoxelChunk : MonoBehaviour
 		float yReminder = (voxelCoordinates.y - y);
 		float zReminder = (voxelCoordinates.z - z);
 
-		// DEBUG:
-		//Debug.Log ("3. Calculating coords. remainders (x=" + xReminder + ", y=" + yReminder + ", z=" + zReminder + ")");
+		if (DEBUG) {
+			Debug.Log ("3. Calculating coords. remainders (x=" + xReminder + ", y=" + yReminder + ", z=" + zReminder + ")");
+		}
 		
 		if (xReminder < EPSILON && xReminder > -EPSILON) {
-			// DEBUG:
-			//Debug.Log ("4. Moving voxel coordenate left");
-			x--;
+			if (DEBUG) {
+				Debug.Log ("4. Moving voxel coordenate left");
+			}
+			x = Mathf.Max (0, x - 1);
 		} else if (yReminder < EPSILON && yReminder > -EPSILON) {
-			// DEBUG:
-			//Debug.Log ("4. Moving voxel coordenate down");
-			y--;
+			if (DEBUG) {
+				Debug.Log ("4. Moving voxel coordenate down");
+			}
+			y = Mathf.Max (0, y - 1);
 		} else if (zReminder < EPSILON && zReminder > -EPSILON) {
-			// DEBUG:
-			//Debug.Log ("4. Moving voxel coordenate forward");
-			z--;
+			if (DEBUG) {
+				Debug.Log ("4. Moving voxel coordenate forward");
+			}
+			z = Mathf.Max (0, z - 1);
 		}
 
-		// DEBUG:
-		//Debug.Log ("5. New voxel coordinates: (" + x + ", " + y + ", " + z + ")");
+		if (DEBUG) {
+			Debug.Log ("5. New voxel coordinates: (" + x + ", " + y + ", " + z + ")");
+		}
 	}
 		
 	void FindAdjacentEmptyVoxel (Vector3 point, out int x, out int y, out int z)
@@ -258,52 +267,63 @@ public class VoxelChunk : MonoBehaviour
 		y = Mathf.FloorToInt (voxelCoordinates.y);
 		z = Mathf.FloorToInt (voxelCoordinates.z);
 
-		// DEBUG:
-		//Debug.Log ("********** Finding adjacent voxel **********");
-		//Debug.Log ("1. Snapped voxel coordinates: (" + x + ", " + y + ", " + z + ")");
+		if (DEBUG) {
+			Debug.Log ("********** Finding adjacent voxel **********");
+			Debug.Log ("1. Snapped voxel coordinates: (" + x + ", " + y + ", " + z + ")");
+		}
 
 		if (x == width || y == height || z == depth) {
-			// DEBUG:
-			//Debug.Log ("2. Picking voxel at chunk's border");
+			if (DEBUG) {
+				Debug.Log ("2. Picking voxel at chunk's border");
+			}
 			return;
 		}
 
-		// DEBUG:
-		//Debug.Log ("2. Picking internal chunk voxel");
+		if (DEBUG) {
+			Debug.Log ("2. Picking internal chunk voxel");
+		}
 
 		int voxelIndex = y * depth_x_width + z * width + x;
 
 		if (data [voxelIndex] == 0) {
-			//Debug.Log ("3. Adjacent empty voxel found, returning");
+			if (DEBUG) {
+				Debug.Log ("3. Adjacent empty voxel found, returning");
+			}
 			return;
 		}
 
-		// DEBUG:
-		//Debug.Log ("3. Occupied voxel found, supposed error in snapping");
+		if (DEBUG) {
+			Debug.Log ("3. Occupied voxel found, supposed error in snapping");
+		}
 
 		float xReminder = (voxelCoordinates.x - x);
 		float yReminder = (voxelCoordinates.y - y);
 		float zReminder = (voxelCoordinates.z - z);
 
-		// DEBUG:
-		//Debug.Log ("4. Calculating coords. remainders (x=" + xReminder + ", y=" + yReminder + ", z=" + zReminder + ")");
+		if (DEBUG) {
+			Debug.Log ("4. Calculating coords. remainders (x=" + xReminder + ", y=" + yReminder + ", z=" + zReminder + ")");
+		}
 
 		if (xReminder < EPSILON && xReminder > -EPSILON) {
-			// DEBUG:
-			//Debug.Log ("5. Moving voxel coordenate left");
+			if (DEBUG) {
+				Debug.Log ("5. Moving voxel coordenate left");
+			}
 			x--;
 		} else if (yReminder < EPSILON && yReminder > -EPSILON) {
-			// DEBUG:
-			//Debug.Log ("5. Moving voxel coordenate down");
+			if (DEBUG) {
+				Debug.Log ("5. Moving voxel coordenate down");
+			}
 			y--;
 		} else if (zReminder < EPSILON && zReminder > -EPSILON) {
-			// DEBUG:
-			//Debug.Log ("5. Moving voxel coordenate forward");
+			if (DEBUG) {
+				Debug.Log ("5. Moving voxel coordenate forward");
+			}
 			z--;
 		}
 
-		// DEBUG:
-		//Debug.Log ("6. New voxel coordinates: (" + x + ", " + y + ", " + z + ")");
+		if (DEBUG) {
+			Debug.Log ("6. New voxel coordinates: (" + x + ", " + y + ", " + z + ")");
+		}
 	}
 		
 	public void AddVoxel (byte voxelId, Vector3 point)
@@ -325,19 +345,19 @@ public class VoxelChunk : MonoBehaviour
 			throw new Exception ("!built");
 		}
 
-		// DEBUG:
-		//Debug.Log ("- Trying to add voxel [chunk=(" + this.x + ", " + this.y + ", " + this.z + "), voxel=(" + x + ", " + y + ", " + z + ")]");
+		if (DEBUG) {
+			Debug.Log ("- Trying to add voxel [chunk=(" + this.x + ", " + this.y + ", " + this.z + "), voxel=(" + x + ", " + y + ", " + z + ")]");
+		}
 		
 		if (x < 0) {
 			if (terrain == null) {
-				// DEBUG:
-				//Debug.Log ("- Can't add voxel");
 				throw new Exception ("can't add voxel");
 			} else {
 				VoxelChunk chunk = terrain.GetChunkAtLeft (this.x, this.y, this.z);
 				if (chunk != null) {
-					// DEBUG:
-					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk at left [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					if (DEBUG) {
+						Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk at left [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					}
 					chunk.AddVoxel (voxelId, chunk.width - 1, y, z);
 				}
 			}
@@ -345,14 +365,13 @@ public class VoxelChunk : MonoBehaviour
 			return;
 		} else if (x >= width) {
 			if (terrain == null) {
-				// DEBUG:
-				//Debug.Log ("- Can't add voxel");
 				throw new Exception ("can't add voxel");
 			} else {
 				VoxelChunk chunk = terrain.GetChunkAtRight (this.x, this.y, this.z);
 				if (chunk != null) {
-					// DEBUG:
-					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk at right [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					if (DEBUG) {
+						Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk at right [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					}
 					chunk.AddVoxel (voxelId, 0, y, z);
 				}
 			}
@@ -362,14 +381,13 @@ public class VoxelChunk : MonoBehaviour
 		
 		if (z < 0) {
 			if (terrain == null) {
-				// DEBUG:
-				//Debug.Log ("- Can't add voxel");
 				throw new Exception ("can't add voxel");
 			} else {
 				VoxelChunk chunk = terrain.GetChunkInFront (this.x, this.y, this.z);
 				if (chunk != null) {
-					// DEBUG:
-					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk in front [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					if (DEBUG) {
+						Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk in front [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					}
 					chunk.AddVoxel (voxelId, x, y, chunk.depth - 1);
 				}
 			}
@@ -377,14 +395,13 @@ public class VoxelChunk : MonoBehaviour
 			return;
 		} else if (z >= depth) {
 			if (terrain == null) {
-				// DEBUG:
-				//Debug.Log ("- Can't add voxel");
 				throw new Exception ("can't add voxel");
 			} else {
 				VoxelChunk chunk = terrain.GetChunkBehind (this.x, this.y, this.z);
 				if (chunk != null) {
-					// DEBUG:
-					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk behind [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					if (DEBUG) {
+						Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk behind [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					}
 					chunk.AddVoxel (voxelId, x, y, 0);
 				}
 			}
@@ -394,14 +411,13 @@ public class VoxelChunk : MonoBehaviour
 		
 		if (y < 0) {
 			if (terrain == null) {
-				// DEBUG:
-				//Debug.Log ("- Can't add voxel");
 				throw new Exception ("can't add voxel");
 			} else {
 				VoxelChunk chunk = terrain.GetChunkBelow (this.x, this.y, this.z);
 				if (chunk != null) {
-					// DEBUG:
-					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk below [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					if (DEBUG) {
+						Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk below [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					}
 					chunk.AddVoxel (voxelId, x, chunk.height - 1, z);
 				}
 			}
@@ -409,14 +425,13 @@ public class VoxelChunk : MonoBehaviour
 			return;
 		} else if (y >= height) {
 			if (terrain == null) {
-				// DEBUG:
-				//Debug.Log ("- Can't add voxel");
 				throw new Exception ("can't add voxel");
 			} else {
 				VoxelChunk chunk = terrain.GetChunkAbove (this.x, this.y, this.z);
 				if (chunk != null) {
-					// DEBUG:
-					//Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk above [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					if (DEBUG) {
+						Debug.Log ("- Cross-boundaries voxel addition: passing command to chunk above [from (" + this.x + ", " + this.y + ", " + this.z + ") to (" + chunk.x + ", " + chunk.y + ", " + chunk.z + ")]");
+					}
 					chunk.AddVoxel (voxelId, x, 0, z);
 				}
 			}
@@ -632,8 +647,9 @@ public class VoxelChunk : MonoBehaviour
 			throw new Exception ("!built");
 		}
 
-		// DEBUG:
-		//Debug.Log ("- Trying to remove voxel [chunk=(" + this.x + ", " + this.y + ", " + this.z + "), voxel=(" + x + ", " + y + ", " + z + ")]");
+		if (DEBUG) {
+			Debug.Log ("- Trying to remove voxel [chunk=(" + this.x + ", " + this.y + ", " + this.z + "), voxel=(" + x + ", " + y + ", " + z + ")]");
+		}
 		
 		if (x < 0 || x > width || y < 0 || y > height || z < 0 || z > depth) {
 			// FIXME: checking invariants
