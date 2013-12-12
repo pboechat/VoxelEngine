@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 
 // 12 bytes
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack=1)]
 [Serializable]
 public struct Voxel
 {
