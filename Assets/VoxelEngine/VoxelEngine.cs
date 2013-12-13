@@ -21,15 +21,10 @@ public class VoxelEngine : Singleton<VoxelEngine>
 
 	}
 
-	[SerializeField]
-	public Material
-		atlas;
-	[SerializeField]
-	private int
-		_tileSize;
-	[SerializeField]
-	private float
-		_voxelSize;
+	public float voxelSize;
+	public Material atlas;
+	public int tileSize;
+	public VoxelFaceMapping[] voxelFaceMappings;
 	[SerializeField]
 	private float
 		_halfVoxelSize;
@@ -54,17 +49,8 @@ public class VoxelEngine : Singleton<VoxelEngine>
 	[SerializeField]
 	private Rect[]
 		_tileUvsCache;
-	[SerializeField]
-	private VoxelFaceMapping[]
-		_voxelFaceMappings;
 	private Dictionary<byte, int[]>
 		_voxelFaceMappingCache;
-		
-	public int tileSize {
-		get {
-			return _tileSize;
-		}
-	}
 		
 	public Vector3 up {
 		get {
@@ -101,37 +87,42 @@ public class VoxelEngine : Singleton<VoxelEngine>
 			return _forward;
 		}
 	}
-	
-	public float voxelSize {
-		get { 
-			return _voxelSize;
-		}
-	}
 		
 	public float halfVoxelSize {
 		get { 
 			return _halfVoxelSize; 
 		}
 	}
+	
+	void Awake ()
+	{
+		Update ();
+	}
 
-	public void SetVoxelSize (float voxelSize)
+	void CalculateCachedFields ()
 	{
 		// cached fields
-		_voxelSize = voxelSize;
-		_halfVoxelSize = _voxelSize * 0.5f;
-		_up = Vector3.up * _voxelSize;
-		_down = Vector3.down * _voxelSize;
-		_right = Vector3.right * _voxelSize;
-		_left = Vector3.left * _voxelSize;
-		_back = Vector3.back * _voxelSize;
-		_forward = Vector3.forward * _voxelSize;
+		_halfVoxelSize = voxelSize * 0.5f;
+		_up = Vector3.up * voxelSize;
+		_down = Vector3.down * voxelSize;
+		_right = Vector3.right * voxelSize;
+		_left = Vector3.left * voxelSize;
+		_back = Vector3.back * voxelSize;
+		_forward = Vector3.forward * voxelSize;
+	}
+	
+	public void Update ()
+	{
+		CalculateCachedFields ();
+		BuildTileUvsCache ();
+		BuildVoxelFaceMappingCache ();
 	}
 
 	void BuildTileUvsCache ()
 	{
 		Texture2D atlasTexture = (Texture2D)atlas.mainTexture;
-		int width = atlasTexture.width / _tileSize;
-		int height = atlasTexture.height / _tileSize;
+		int width = atlasTexture.width / tileSize;
+		int height = atlasTexture.height / tileSize;
 		Vector2 xOffset = Vector3.right * (1.0f / width);
 		Vector2 yOffset = Vector3.up * (1.0f / height);
 		_tileUvsCache = new Rect[width * height];
@@ -147,25 +138,11 @@ public class VoxelEngine : Singleton<VoxelEngine>
 			yStart -= yOffset;
 		}
 	}
-		
-	public void SetTileSize (int tileSize)
-	{
-		_tileSize = tileSize;
-		
-		Texture2D atlasTexture = (Texture2D)atlas.mainTexture;
-		if (atlasTexture.width % _tileSize != 0 || atlasTexture.height % _tileSize != 0) {
-			Debug.LogError ("atlas dimensions must be multiple of tile size");
-			enabled = false;
-			return;
-		}
-				
-		BuildTileUvsCache ();
-	}
 
 	public void BuildVoxelFaceMappingCache ()
 	{
 		_voxelFaceMappingCache = new Dictionary<byte, int[]> ();
-		foreach (VoxelFaceMapping voxelFaceMapping in _voxelFaceMappings) {
+		foreach (VoxelFaceMapping voxelFaceMapping in voxelFaceMappings) {
 			int[] faceMapping = new int[10];
 			faceMapping [0] = voxelFaceMapping.frontFaceTileId;
 			faceMapping [1] = voxelFaceMapping.topFaceTileId;
@@ -192,10 +169,6 @@ public class VoxelEngine : Singleton<VoxelEngine>
 
 	public void GetVoxelFaceMapping (byte voxelId, out int frontFaceTileId, out int topFaceTileId, out int rightFaceTileId, out int backFaceTileId, out int bottomFaceTileId, out int leftFaceTileId, bool hasTopNeighbor)
 	{
-		if (_voxelFaceMappingCache == null) {
-			BuildVoxelFaceMappingCache ();
-		}
-	
 		int[] faceMapping;
 		if (!_voxelFaceMappingCache.TryGetValue (voxelId, out faceMapping)) {
 			throw new Exception ("unmapped voxel id: " + voxelId);
