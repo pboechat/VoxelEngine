@@ -3,7 +3,7 @@ using System.Collections;
 
 public class InputDialog : AbstractDialog
 {
-	private string _submitString;
+	//private string _submitString;
 
 	public string Input
 	{
@@ -17,7 +17,7 @@ public class InputDialog : AbstractDialog
 		SetMessage( message );
 		AddButtons( new string[]{ cancelString, submitString } );
 
-		_submitString = submitString;
+		//_submitString = submitString;
 	}
 	
 	public static implicit operator bool( InputDialog d )

@@ -4,9 +4,9 @@ using System.Collections;
 [System.Serializable]
 public class DockAreaConfiguration
 {
-	[SerializeField]
-	[HideInInspector]
-	private string _name;
+	//[SerializeField]
+	//[HideInInspector]
+	//private string _name;
 	
 	[SerializeField]
 	[HideInInspector]
@@ -21,7 +21,7 @@ public class DockAreaConfiguration
 	public DockAreaConfiguration( DockManager.Dockable area )
 	{
 		_area = area;
-		_name = _area.ToString();
+		//_name = _area.ToString();
 	}
 
 	public int TotalValue

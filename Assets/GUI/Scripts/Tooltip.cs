@@ -19,8 +19,6 @@ public class Tooltip : MonoBehaviour
 
 	private void Update()
 	{
-		Vector3 mPos = Input.mousePosition;
-
 		if( _uiCamera != null )
 			transform.position = _uiCamera.ScreenToWorldPoint( Input.mousePosition );
 	}

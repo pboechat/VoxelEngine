@@ -7,8 +7,6 @@ using Aubergine.Noise.NoiseUtils;
 
 public class VoxelTerrain : MonoBehaviour
 {
-	private const bool DEBUG = false;
-	
 	public enum ResizeDirection
 	{
 		NONE,
@@ -45,7 +43,7 @@ public class VoxelTerrain : MonoBehaviour
 		gridCenter;
 	[SerializeField]
 	private VoxelChunk[]
-	grid;
+		grid;
 	
 	void Start ()
 	{
@@ -121,7 +119,7 @@ public class VoxelTerrain : MonoBehaviour
 			yStart += VoxelEngine.instance.up;
 		}
 		
-	ChunkAndVoxelBoundsFound:
+		ChunkAndVoxelBoundsFound:
 		if (cX1 == -1 && cY1 == -1 && cZ1 == -1 && vX1 == -1 && vY1 == -1 && vZ1 == -1) {
 			// no valid grid position found for query, exit
 			query.Dispose ();
@@ -263,7 +261,7 @@ public class VoxelTerrain : MonoBehaviour
 			int cZ1 = cZ * gridWidth;
 			for (int cX = 0; cX < gridWidth; cX++) {
 				int chunkWidth = cX * 12;
-				for (int cY = 0, chunkHeight = 0; cY < gridHeight; cY++) {
+				for (int cY = 0; cY < gridHeight; cY++) {
 					Voxel[] data = new Voxel[1728]; // 20736 bytes
 					for (int vY = 0, i = 0; vY < 12; vY++) {
 						for (int vZ = 0; vZ < 12; vZ++) {
@@ -276,7 +274,7 @@ public class VoxelTerrain : MonoBehaviour
 								voxel.attr4 = reader.ReadInt16 ();
 								voxel.attr5 = reader.ReadInt16 ();
 								voxel.attr6 = reader.ReadInt32 ();
-								data[i] = voxel;
+								data [i] = voxel;
 							}
 						}
 					}
@@ -311,7 +309,7 @@ public class VoxelTerrain : MonoBehaviour
 		for (int cZ = 0; cZ < gridDepth; cZ++) {
 			int cZ1 = cZ * gridWidth;
 			for (int cX = 0; cX < gridWidth; cX++) {
-				for (int cY = 0, chunkHeight = 0; cY < gridHeight; cY++) {
+				for (int cY = 0; cY < gridHeight; cY++) {
 					VoxelChunk chunk = grid [cY * gridDepth_x_gridWidth + cZ1 + cX];
 					if (chunk == null) {
 						writer.Write (emptyChunk);
@@ -338,9 +336,8 @@ public class VoxelTerrain : MonoBehaviour
 		writer.Close ();
 		fileStream.Close ();
 		
-		if (DEBUG) {
-			Debug.Log ("- File saved successfully: " + filePath);
-		}
+		// DEBUG:
+		// Debug.Log ("- File saved successfully: " + filePath);
 	}
 	
 	public void Generate ()
@@ -432,9 +429,8 @@ public class VoxelTerrain : MonoBehaviour
 	
 	void ResizeGrid (int newGridWidth, int newGridHeight, int newGridDepth)
 	{
-		if (DEBUG) {
-			Debug.Log ("- Resizing grid: from (" + gridWidth + ", " + gridHeight + ", " + gridDepth + ") to (" + newGridWidth + ", " + newGridHeight + ", " + newGridDepth + ")");
-		}
+		// DEBUG:
+		// Debug.Log ("- Resizing grid: from (" + gridWidth + ", " + gridHeight + ", " + gridDepth + ") to (" + newGridWidth + ", " + newGridHeight + ", " + newGridDepth + ")");
 		
 		VoxelChunk[] newGrid = new VoxelChunk[newGridHeight * newGridDepth * newGridWidth]; 
 		int i = 0;
@@ -462,9 +458,8 @@ public class VoxelTerrain : MonoBehaviour
 			if (resizeDirection == ResizeDirection.HORIZONTAL || resizeDirection == ResizeDirection.HORIZONTAL_AND_VERTICAL) {
 				ResizeGrid (gridWidthBounds, gridHeight, gridDepth);
 			} else {
-				if (DEBUG) {
-					Debug.Log ("- Querying beyond grid limits (horizontal resize not allowed)");
-				}
+				// DEBUG:
+				// Debug.Log ("- Querying beyond grid limits (horizontal resize not allowed)");
 				return null;
 			}
 		}
@@ -477,9 +472,8 @@ public class VoxelTerrain : MonoBehaviour
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
 			Vector3 position = gridCenter + new Vector3 (xGrid2 * chunkSide + halfChunkSide, yGrid * chunkSide + halfChunkSide, zGrid * chunkSide + halfChunkSide);
-			if (DEBUG) {
-				Debug.Log ("- Dynamically creating new chunk: (" + xGrid2 + ", " + yGrid + ", " + zGrid + ")");
-			}
+			// DEBUG:
+			// Debug.Log ("- Dynamically creating new chunk: (" + xGrid2 + ", " + yGrid + ", " + zGrid + ")");
 			chunk = BuildChunk (xGrid2, yGrid, zGrid, position, data);
 			grid [i] = chunk;
 		}
@@ -490,9 +484,8 @@ public class VoxelTerrain : MonoBehaviour
 	{
 		int xGrid2 = xGrid - 1;
 		if (xGrid2 < 0) {
-			if (DEBUG) {
-				Debug.Log ("- Querying beyond grid limits");
-			}
+			// DEBUG:
+			// Debug.Log ("- Querying beyond grid limits");
 			return null;
 		}
 		
@@ -504,9 +497,8 @@ public class VoxelTerrain : MonoBehaviour
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
 			Vector3 position = gridCenter + new Vector3 (xGrid2 * chunkSide + halfChunkSide, yGrid * chunkSide + halfChunkSide, zGrid * chunkSide + halfChunkSide);
-			if (DEBUG) {
-				Debug.Log ("- Dynamically creating new chunk: (" + xGrid2 + ", " + yGrid + ", " + zGrid + ")");
-			}
+			// DEBUG:
+			// Debug.Log ("- Dynamically creating new chunk: (" + xGrid2 + ", " + yGrid + ", " + zGrid + ")");
 			chunk = BuildChunk (xGrid2, yGrid, zGrid, position, data);
 			grid [i] = chunk;
 		}
@@ -521,9 +513,8 @@ public class VoxelTerrain : MonoBehaviour
 			if (resizeDirection == ResizeDirection.HORIZONTAL || resizeDirection == ResizeDirection.HORIZONTAL_AND_VERTICAL) {
 				ResizeGrid (gridWidth, gridHeight, gridDepthBound);
 			} else {
-				if (DEBUG) {
-					Debug.Log ("- Querying beyond grid limits (horizontal resize not allowed)");
-				}
+				// DEBUG:
+				// Debug.Log ("- Querying beyond grid limits (horizontal resize not allowed)");
 				return null;
 			}
 		}
@@ -536,9 +527,8 @@ public class VoxelTerrain : MonoBehaviour
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
 			Vector3 position = gridCenter + new Vector3 (xGrid * chunkSide + halfChunkSide, yGrid * chunkSide + halfChunkSide, zGrid2 * chunkSide + halfChunkSide);
-			if (DEBUG) {
-				Debug.Log ("- Dynamically creating new chunk: (" + xGrid + ", " + yGrid + ", " + zGrid2 + ")");
-			}
+			// DEBUG:
+			// Debug.Log ("- Dynamically creating new chunk: (" + xGrid + ", " + yGrid + ", " + zGrid2 + ")");
 			chunk = BuildChunk (xGrid, yGrid, zGrid2, position, data);
 			grid [i] = chunk;
 		}
@@ -549,9 +539,8 @@ public class VoxelTerrain : MonoBehaviour
 	{
 		int zGrid2 = zGrid - 1;
 		if (zGrid2 < 0) {
-			if (DEBUG) {
-				Debug.Log ("- Querying beyond grid limits");
-			}
+			// DEBUG:
+			// Debug.Log ("- Querying beyond grid limits");
 			return null;
 		}
 		
@@ -563,9 +552,8 @@ public class VoxelTerrain : MonoBehaviour
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
 			Vector3 position = gridCenter + new Vector3 (xGrid * chunkSide + halfChunkSide, yGrid * chunkSide + halfChunkSide, zGrid2 * chunkSide + halfChunkSide);
-			if (DEBUG) {
-				Debug.Log ("- Dynamically creating new chunk: (" + xGrid + ", " + yGrid + ", " + zGrid2 + ")");
-			}
+			// DEBUG:
+			// Debug.Log ("- Dynamically creating new chunk: (" + xGrid + ", " + yGrid + ", " + zGrid2 + ")");
 			chunk = BuildChunk (xGrid, yGrid, zGrid2, position, data);
 			grid [i] = chunk;
 		}
@@ -580,9 +568,8 @@ public class VoxelTerrain : MonoBehaviour
 			if (resizeDirection == ResizeDirection.VERTICAL || resizeDirection == ResizeDirection.HORIZONTAL_AND_VERTICAL) {
 				ResizeGrid (gridWidth, gridHorizontalBound, gridDepth);
 			} else {
-				if (DEBUG) {
-					Debug.Log ("- Querying above grid limits (vertical resize not allowed)");
-				}
+				// DEBUG:
+				// Debug.Log ("- Querying above grid limits (vertical resize not allowed)");
 				return null;
 			}
 		}
@@ -595,9 +582,8 @@ public class VoxelTerrain : MonoBehaviour
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
 			Vector3 position = gridCenter + new Vector3 (xGrid * chunkSide + halfChunkSide, yGrid2 * chunkSide + halfChunkSide, zGrid * chunkSide + halfChunkSide);
-			if (DEBUG) {
-				Debug.Log ("- Dynamically creating new chunk: (" + xGrid + ", " + yGrid2 + ", " + zGrid + ")");
-			}
+			// DEBUG:
+			// Debug.Log ("- Dynamically creating new chunk: (" + xGrid + ", " + yGrid2 + ", " + zGrid + ")");
 			chunk = BuildChunk (xGrid, yGrid2, zGrid, position, data);
 			grid [i] = chunk;
 		}
@@ -608,9 +594,8 @@ public class VoxelTerrain : MonoBehaviour
 	{
 		int yGrid2 = yGrid - 1;
 		if (yGrid2 < 0) {
-			if (DEBUG) {
-				Debug.Log ("- Querying below grid limits");
-			}
+			// DEBUG:
+			// Debug.Log ("- Querying below grid limits");
 			return null;
 		}
 		
@@ -622,9 +607,8 @@ public class VoxelTerrain : MonoBehaviour
 			float chunkSide = 12 * VoxelEngine.instance.voxelSize;
 			float halfChunkSide = chunkSide * 0.5f;
 			Vector3 position = gridCenter + new Vector3 (xGrid * chunkSide + halfChunkSide, yGrid2 * chunkSide + halfChunkSide, zGrid * chunkSide + halfChunkSide);
-			if (DEBUG) {
-				Debug.Log ("- Dynamically creating new chunk: (" + xGrid + ", " + yGrid2 + ", " + zGrid + ")");
-			}
+			// DEBUG:
+			// Debug.Log ("- Dynamically creating new chunk: (" + xGrid + ", " + yGrid2 + ", " + zGrid + ")");
 			chunk = BuildChunk (xGrid, yGrid2, zGrid, position, data);
 			grid [i] = chunk;
 		}
